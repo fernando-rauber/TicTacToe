@@ -5,6 +5,8 @@ import org.koin.android.ext.koin.androidApplication
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.core.module.Module
 import org.koin.dsl.module
+import uk.fernando.tictactoe.datastore.GamePrefsStore
+import uk.fernando.tictactoe.datastore.GamePrefsStoreImpl
 import uk.fernando.tictactoe.datastore.PrefsStore
 import uk.fernando.tictactoe.datastore.PrefsStoreImpl
 import uk.fernando.tictactoe.viewmodel.HomeViewModel
@@ -21,6 +23,7 @@ object KoinModule {
 
 //        single { getAndroidLogger() }
         single<PrefsStore> { PrefsStoreImpl(androidApplication()) }
+        single<GamePrefsStore> { GamePrefsStoreImpl(androidApplication()) }
     }
 
     private val useCaseModule: Module
