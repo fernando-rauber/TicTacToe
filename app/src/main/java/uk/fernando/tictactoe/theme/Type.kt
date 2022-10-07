@@ -23,7 +23,7 @@ val Typography = Typography(
     titleLarge = TextStyle(
         fontFamily = solwayFamily,
         fontWeight = FontWeight.Bold,
-        fontSize = 28.sp
+        fontSize = 32.sp
     ),
     titleMedium = TextStyle(
         fontFamily = solwayFamily,

@@ -2,6 +2,7 @@ package uk.fernando.tictactoe.theme
 
 import androidx.compose.ui.graphics.Color
 
+val greenLight = Color(0xFF5AC23F)
 val green = Color(0xFF169D77)
 val greenDark = Color(0xFF107055)
 
