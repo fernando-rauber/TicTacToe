@@ -12,7 +12,7 @@ private val DarkColorScheme = darkColorScheme(
     primary = green,
     background = dark,
     secondary = orange,
-    surface = lightDark,
+    surface = darkLight,
 )
 
 @Composable

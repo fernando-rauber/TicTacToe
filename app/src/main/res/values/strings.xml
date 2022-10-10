@@ -5,4 +5,19 @@
     <string name="tac">Tac</string>
     <string name="toe">Toe</string>
 
+
+    // Home
+    <string name="board_size">Board size</string>
+    <string name="win_condition">Win condition</string>
+    <string name="rounds">Rounds</string>
+    <string name="game_type">Game type</string>
+    <string name="difficulty">Difficulty</string>
+
+    <string name="single_player">Single PLayer</string>
+    <string name="multiplayer">Multiplayer</string>
+
+    <string name="easy">Easy</string>
+    <string name="medium">Medium</string>
+    <string name="hard">Hard</string>
+
 </resources>

@@ -37,7 +37,7 @@ object KoinModule {
     private val viewModelModule: Module
         get() = module {
 
-            viewModel { HomeViewModel() }
+            viewModel { HomeViewModel(get()) }
         }
 
 //    fun getAndroidLogger(): MyLogger {
