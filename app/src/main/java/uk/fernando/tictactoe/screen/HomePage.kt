@@ -14,6 +14,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import kotlinx.coroutines.launch
 import org.koin.androidx.compose.getViewModel
 import org.koin.androidx.compose.inject
 import uk.fernando.tictactoe.R
@@ -34,8 +35,8 @@ fun HomePage(
     val gamePrefs: GamePrefsStore by inject()
     val boardSize = gamePrefs.getBoardSize().collectAsState(initial = 3)
     val winCondition = gamePrefs.getWinCondition().collectAsState(initial = 3)
-//    val difficulty = gamePrefs.difficulty().collectAsState(initial = 1)
-//    val operators = gamePrefs.getOperators().collectAsState(initial = listOf(1, 2, 3, 4))
+    val rounds = gamePrefs.getRounds().collectAsState(initial = 3)
+    val gameType = gamePrefs.getGameType().collectAsState(initial = 1)
 
     Column(modifier = Modifier.fillMaxSize()) {
 
@@ -62,6 +63,20 @@ fun HomePage(
                 viewModel = viewModel,
                 selectedValue = winCondition.value,
                 onSelected = { viewModel.setWinCondition(it) }
+            )
+
+            MyDivider()
+
+            Rounds(
+                selectedValue = rounds.value,
+                onSelected = { coroutine.launch { gamePrefs.storeRounds(it) } }
+            )
+
+            MyDivider()
+
+            GameType(
+                selectedValue = gameType.value,
+                onSelected = { coroutine.launch { gamePrefs.storeGameType(it) } }
             )
 
             MyDivider()
@@ -110,7 +125,7 @@ private fun WinCondition(viewModel: HomeViewModel, selectedValue: Int, onSelecte
     LazyVerticalGrid(
         columns = GridCells.Adaptive(64.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
-        contentPadding = PaddingValues(vertical = 16.dp),
+        contentPadding = PaddingValues(vertical = 8.dp),
         content = {
             items(viewModel.winCondition) { win ->
                 MyChip(
@@ -123,6 +138,64 @@ private fun WinCondition(viewModel: HomeViewModel, selectedValue: Int, onSelecte
     )
 
     WinConditionIcon(selectedValue)
+}
+
+@Composable
+private fun Rounds(selectedValue: Int, onSelected: (Int) -> Unit) {
+    val valuesList = listOf(1, 3, 5)
+
+    Text(
+        text = stringResource(R.string.rounds),
+        style = MaterialTheme.typography.bodyLarge,
+        color = MaterialTheme.colorScheme.onBackground
+    )
+
+    LazyVerticalGrid(
+        columns = GridCells.Adaptive(64.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        contentPadding = PaddingValues(vertical = 8.dp),
+        content = {
+            items(valuesList) { value ->
+                MyChip(
+                    text = "$value",
+                    isSelected = selectedValue == value,
+                    onClick = { onSelected(value) }
+                )
+            }
+        }
+    )
+}
+
+@Composable
+private fun GameType(selectedValue: Int, onSelected: (Int) -> Unit) {
+
+    Text(
+        text = stringResource(R.string.game_type),
+        style = MaterialTheme.typography.bodyLarge,
+        color = MaterialTheme.colorScheme.onBackground
+    )
+
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(2),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        contentPadding = PaddingValues(vertical = 8.dp),
+        content = {
+            item {
+                MyChip(
+                    text = stringResource(R.string.single_player),
+                    isSelected = selectedValue == 1,
+                    onClick = { onSelected(1) }
+                )
+            }
+            item {
+                MyChip(
+                    text = stringResource(R.string.multiplayer),
+                    isSelected = selectedValue == 2,
+                    onClick = { onSelected(2) }
+                )
+            }
+        }
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
