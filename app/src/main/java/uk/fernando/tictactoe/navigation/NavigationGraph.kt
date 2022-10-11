@@ -4,6 +4,7 @@ import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
+import uk.fernando.tictactoe.screen.GamePage
 import uk.fernando.tictactoe.screen.HomePage
 import uk.fernando.tictactoe.screen.SettingsPage
 
@@ -16,7 +17,7 @@ fun NavGraphBuilder.buildGraph(navController: NavController) {
     }
 
     composable(Directions.game.path) {
-
+        GamePage(navController)
     }
 
     composable(Directions.settings.path) {

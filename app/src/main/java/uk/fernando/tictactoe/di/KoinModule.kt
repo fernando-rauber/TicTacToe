@@ -9,6 +9,7 @@ import uk.fernando.tictactoe.datastore.GamePrefsStore
 import uk.fernando.tictactoe.datastore.GamePrefsStoreImpl
 import uk.fernando.tictactoe.datastore.PrefsStore
 import uk.fernando.tictactoe.datastore.PrefsStoreImpl
+import uk.fernando.tictactoe.viewmodel.GameViewModel
 import uk.fernando.tictactoe.viewmodel.HomeViewModel
 
 object KoinModule {
@@ -38,6 +39,7 @@ object KoinModule {
         get() = module {
 
             viewModel { HomeViewModel(get()) }
+            viewModel { GameViewModel(get()) }
         }
 
 //    fun getAndroidLogger(): MyLogger {
