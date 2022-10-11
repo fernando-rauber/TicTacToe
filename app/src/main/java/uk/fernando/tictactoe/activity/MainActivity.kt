@@ -44,7 +44,7 @@ class MainActivity : ComponentActivity() {
                     // Content
                     NavHost(
                         navController = controller,
-                        startDestination = Directions.home.path
+                        startDestination = Directions.game.path
                     ) {
                         buildGraph(controller)
                     }
