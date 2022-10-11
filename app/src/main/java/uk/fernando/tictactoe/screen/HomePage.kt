@@ -1,42 +1,43 @@
 package uk.fernando.tictactoe.screen
 
+import androidx.annotation.StringRes
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import kotlinx.coroutines.launch
 import org.koin.androidx.compose.getViewModel
-import org.koin.androidx.compose.inject
 import uk.fernando.tictactoe.R
 import uk.fernando.tictactoe.component.NavigationTopBar
 import uk.fernando.tictactoe.component.WinConditionIcon
-import uk.fernando.tictactoe.datastore.GamePrefsStore
-import uk.fernando.tictactoe.theme.dark
-import uk.fernando.tictactoe.theme.greyLight
+import uk.fernando.tictactoe.navigation.Directions
+import uk.fernando.tictactoe.theme.*
 import uk.fernando.tictactoe.viewmodel.HomeViewModel
+import uk.fernando.util.component.MyAnimatedVisibility
+import uk.fernando.util.component.MyButton
 import uk.fernando.util.component.MyIconButton
+import uk.fernando.util.ext.safeNav
 
 @Composable
 fun HomePage(
     navController: NavController = NavController(LocalContext.current),
     viewModel: HomeViewModel = getViewModel()
 ) {
-    val coroutine = rememberCoroutineScope()
-    val gamePrefs: GamePrefsStore by inject()
-    val boardSize = gamePrefs.getBoardSize().collectAsState(initial = 3)
-    val winCondition = gamePrefs.getWinCondition().collectAsState(initial = 3)
-    val rounds = gamePrefs.getRounds().collectAsState(initial = 3)
-    val gameType = gamePrefs.getGameType().collectAsState(initial = 1)
 
     Column(modifier = Modifier.fillMaxSize()) {
 
@@ -53,42 +54,48 @@ fun HomePage(
 
         Spacer(Modifier.height(30.dp))
 
-        Column(modifier = Modifier.padding(16.dp)) {
+        Column(
+            modifier = Modifier
+                .padding(16.dp)
+                .weight(1f)
+            //.verticalScroll(rememberScrollState())
+        ) {
 
-            BoardSize(boardSize.value) { viewModel.setBoardSize(it) }
-
-            MyDivider()
-
-            WinCondition(
-                viewModel = viewModel,
-                selectedValue = winCondition.value,
-                onSelected = { viewModel.setWinCondition(it) }
-            )
+            BoardSize(viewModel)
 
             MyDivider()
 
-            Rounds(
-                selectedValue = rounds.value,
-                onSelected = { coroutine.launch { gamePrefs.storeRounds(it) } }
-            )
+            WinCondition(viewModel)
 
             MyDivider()
 
-            GameType(
-                selectedValue = gameType.value,
-                onSelected = { coroutine.launch { gamePrefs.storeGameType(it) } }
-            )
+            Rounds(viewModel)
 
             MyDivider()
+
+            GameType(viewModel)
+
+            MyDivider()
+
+            AIDifficulty(viewModel)
+
         }
 
+        MyButton(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+                .defaultMinSize(minHeight = 50.dp),
+            text = stringResource(R.string.start_action).uppercase(),
+            fontSize = 20.sp,
+            color = greenLight,
+            onClick = { navController.safeNav(Directions.game.path) }
+        )
     }
 }
 
 @Composable
-private fun ColumnScope.BoardSize(size: Int, onSelected: (Int) -> Unit) {
-    var boardSize by mutableStateOf(size.toFloat())
-
+private fun ColumnScope.BoardSize(viewModel: HomeViewModel) {
     Text(
         text = stringResource(R.string.board_size),
         style = MaterialTheme.typography.bodyLarge,
@@ -96,26 +103,24 @@ private fun ColumnScope.BoardSize(size: Int, onSelected: (Int) -> Unit) {
     )
 
     Slider(
-        value = boardSize,
+        value = viewModel.boardSize.value.toFloat(),
         colors = SliderDefaults.colors(dark, dark, Color.White, greyLight, dark),
-        onValueChange = {
-            boardSize = it
-            onSelected(it.toInt())
-        },
+        onValueChange = { viewModel.setBoardSize(it.toInt()) },
         steps = 6,
         valueRange = 3f..10f,
     )
 
     Text(
-        modifier = Modifier.align(Alignment.CenterHorizontally),
-        text = "${boardSize.toInt()} X ${boardSize.toInt()}",
+        modifier = Modifier.align(CenterHorizontally),
+        text = "${viewModel.boardSize.value}X${viewModel.boardSize.value}",
         style = MaterialTheme.typography.bodyMedium,
+        fontWeight = FontWeight.SemiBold,
         color = MaterialTheme.colorScheme.onBackground
     )
 }
 
 @Composable
-private fun WinCondition(viewModel: HomeViewModel, selectedValue: Int, onSelected: (Int) -> Unit) {
+private fun WinCondition(viewModel: HomeViewModel) {
     Text(
         text = stringResource(R.string.win_condition),
         style = MaterialTheme.typography.bodyLarge,
@@ -127,88 +132,105 @@ private fun WinCondition(viewModel: HomeViewModel, selectedValue: Int, onSelecte
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         contentPadding = PaddingValues(vertical = 8.dp),
         content = {
-            items(viewModel.winCondition) { win ->
+            items(viewModel.winConditionList) { win ->
                 MyChip(
                     text = "$win",
-                    isSelected = selectedValue == win,
-                    onClick = { onSelected(win) }
+                    isSelected = viewModel.winCondition.value == win,
+                    onClick = { viewModel.setWinCondition(win) }
                 )
             }
         }
     )
 
-    WinConditionIcon(selectedValue)
+    WinConditionIcon(viewModel.winCondition.value)
 }
 
 @Composable
-private fun Rounds(selectedValue: Int, onSelected: (Int) -> Unit) {
+private fun Rounds(viewModel: HomeViewModel) {
     val valuesList = listOf(1, 3, 5)
 
-    Text(
-        text = stringResource(R.string.rounds),
-        style = MaterialTheme.typography.bodyLarge,
-        color = MaterialTheme.colorScheme.onBackground
-    )
-
-    LazyVerticalGrid(
-        columns = GridCells.Adaptive(64.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        contentPadding = PaddingValues(vertical = 8.dp),
-        content = {
-            items(valuesList) { value ->
-                MyChip(
-                    text = "$value",
-                    isSelected = selectedValue == value,
-                    onClick = { onSelected(value) }
-                )
-            }
+    RowContent(title = R.string.rounds) {
+        valuesList.forEach { value ->
+            MyChip(
+                text = "$value",
+                isSelected = viewModel.rounds.value == value,
+                onClick = { viewModel.setRounds(value) }
+            )
         }
-    )
+    }
 }
 
 @Composable
-private fun GameType(selectedValue: Int, onSelected: (Int) -> Unit) {
+private fun GameType(viewModel: HomeViewModel) {
+    RowContent(title = R.string.game_type) {
+        MyChip(
+            text = stringResource(R.string.single_player),
+            isSelected = viewModel.gameType.value == 1,
+            onClick = { viewModel.setGameType(1) }
+        )
+        MyChip(
+            text = stringResource(R.string.multiplayer),
+            isSelected = viewModel.gameType.value == 2,
+            onClick = { viewModel.setGameType(2) }
+        )
+    }
+}
 
-    Text(
-        text = stringResource(R.string.game_type),
-        style = MaterialTheme.typography.bodyLarge,
-        color = MaterialTheme.colorScheme.onBackground
-    )
+@Composable
+private fun AIDifficulty(viewModel: HomeViewModel) {
+    MyAnimatedVisibility(viewModel.gameType.value == 1) {
 
-    LazyVerticalGrid(
-        columns = GridCells.Fixed(2),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        contentPadding = PaddingValues(vertical = 8.dp),
-        content = {
-            item {
+        Column {
+            RowContent(title = R.string.difficulty) {
                 MyChip(
-                    text = stringResource(R.string.single_player),
-                    isSelected = selectedValue == 1,
-                    onClick = { onSelected(1) }
+                    text = stringResource(R.string.easy),
+                    isSelected = viewModel.difficulty.value == 1,
+                    color = greenLight,
+                    onClick = { viewModel.setDifficulty(1) }
                 )
-            }
-            item {
                 MyChip(
-                    text = stringResource(R.string.multiplayer),
-                    isSelected = selectedValue == 2,
-                    onClick = { onSelected(2) }
+                    text = stringResource(R.string.medium),
+                    isSelected = viewModel.difficulty.value == 2,
+                    color = gold,
+                    onClick = { viewModel.setDifficulty(2) }
+                )
+                MyChip(
+                    text = stringResource(R.string.hard),
+                    isSelected = viewModel.difficulty.value == 3,
+                    color = red,
+                    onClick = { viewModel.setDifficulty(3) }
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun RowContent(@StringRes title: Int, content: @Composable () -> Unit) {
+    Text(
+        text = stringResource(title),
+        style = MaterialTheme.typography.bodyLarge,
+        color = MaterialTheme.colorScheme.onBackground
     )
+    Row(
+        modifier = Modifier.padding(top = 8.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        content()
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun MyChip(text: String, isSelected: Boolean, onClick: () -> Unit) {
+private fun MyChip(text: String, isSelected: Boolean, color: Color = dark, onClick: () -> Unit) {
     Card(
         onClick = onClick,
-        elevation = CardDefaults.cardElevation(4.dp),
-        colors = CardDefaults.cardColors(if (isSelected) dark else greyLight),
+        elevation = CardDefaults.cardElevation(6.dp),
+        colors = CardDefaults.cardColors(if (isSelected) color else greyLight),
     ) {
         Text(
             modifier = Modifier
-                .fillMaxWidth()
+                .align(CenterHorizontally)
                 .padding(horizontal = 24.dp, vertical = 3.dp),
             text = text,
             color = Color.White,
@@ -221,7 +243,7 @@ private fun MyChip(text: String, isSelected: Boolean, onClick: () -> Unit) {
 private fun MyDivider() {
     Divider(
         modifier = Modifier.padding(vertical = 8.dp),
-        color = greyLight.copy(0.5f)
+        color = greyLight.copy(0.3f)
     )
 }
 

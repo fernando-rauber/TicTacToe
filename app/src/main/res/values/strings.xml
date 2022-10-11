@@ -13,11 +13,13 @@
     <string name="game_type">Game type</string>
     <string name="difficulty">Difficulty</string>
 
-    <string name="single_player">Single PLayer</string>
+    <string name="single_player">Single Player</string>
     <string name="multiplayer">Multiplayer</string>
 
     <string name="easy">Easy</string>
     <string name="medium">Medium</string>
     <string name="hard">Hard</string>
+
+    <string name="start_action">Start</string>
 
 </resources>

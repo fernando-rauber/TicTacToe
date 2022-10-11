@@ -1,27 +1,40 @@
 package uk.fernando.tictactoe.viewmodel
 
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
 import kotlinx.coroutines.flow.first
 import uk.fernando.tictactoe.datastore.GamePrefsStore
 
 class HomeViewModel(private val prefsStore: GamePrefsStore) : BaseViewModel() {
 
-    private val _winCondition = mutableStateListOf<Int>()
-    val winCondition: List<Int> = _winCondition
-    private var winConditionValue: Int = 3
+    val boardSize = mutableStateOf(3)
+    val winCondition = mutableStateOf(3)
+    val rounds = mutableStateOf(3)
+    val gameType = mutableStateOf(1)
+    val difficulty = mutableStateOf(1)
+
+    private val _winConditionList = mutableStateListOf<Int>()
+    val winConditionList: List<Int> = _winConditionList
 
     init {
         launchDefault {
-            updateWinConditionList(prefsStore.getBoardSize().first())
-        }
+            boardSize.value = prefsStore.getBoardSize().first()
+            winCondition.value = prefsStore.getWinCondition().first()
+            rounds.value = prefsStore.getRounds().first()
+            gameType.value = prefsStore.getGameType().first()
+            difficulty.value = prefsStore.getDifficulty().first()
 
+
+            updateWinConditionList(boardSize.value)
+        }
     }
 
     fun setBoardSize(size: Int) {
+        boardSize.value = size
         launchDefault {
             prefsStore.storeBoardSize(size)
 
-            if (size < winConditionValue)
+            if (size < winCondition.value)
                 setWinCondition(size)
 
             updateWinConditionList(size)
@@ -29,17 +42,30 @@ class HomeViewModel(private val prefsStore: GamePrefsStore) : BaseViewModel() {
     }
 
     fun setWinCondition(value: Int) {
-        launchDefault {
-            winConditionValue = value
-            prefsStore.storeWinCondition(value)
-        }
+        winCondition.value = value
+        launchDefault { prefsStore.storeWinCondition(value) }
+    }
+
+    fun setRounds(value: Int) {
+        rounds.value = value
+        launchDefault { prefsStore.storeRounds(value) }
+    }
+
+    fun setGameType(value: Int) {
+        gameType.value = value
+        launchDefault { prefsStore.storeGameType(value) }
+    }
+
+    fun setDifficulty(value: Int) {
+        difficulty.value = value
+        launchDefault { prefsStore.storeDifficulty(value) }
     }
 
     private fun updateWinConditionList(boardSize: Int) {
-        _winCondition.clear()
+        _winConditionList.clear()
 
-        for (i in 3..boardSize) {
-            _winCondition.add(i)
+        for (i in 3..if(boardSize <= 8) boardSize else 8) {
+            _winConditionList.add(i)
         }
     }
 }
