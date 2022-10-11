@@ -2,7 +2,6 @@ package uk.fernando.tictactoe.viewmodel
 
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
-import kotlinx.coroutines.flow.first
 import uk.fernando.tictactoe.datastore.GamePrefsStore
 
 class HomeViewModel(private val prefsStore: GamePrefsStore) : BaseViewModel() {
@@ -18,12 +17,11 @@ class HomeViewModel(private val prefsStore: GamePrefsStore) : BaseViewModel() {
 
     init {
         launchDefault {
-            boardSize.value = prefsStore.getBoardSize().first()
-            winCondition.value = prefsStore.getWinCondition().first()
-            rounds.value = prefsStore.getRounds().first()
-            gameType.value = prefsStore.getGameType().first()
-            difficulty.value = prefsStore.getDifficulty().first()
-
+            boardSize.value = prefsStore.getBoardSize()
+            winCondition.value = prefsStore.getWinCondition()
+            rounds.value = prefsStore.getRounds()
+            gameType.value = prefsStore.getGameType()
+            difficulty.value = prefsStore.getDifficulty()
 
             updateWinConditionList(boardSize.value)
         }
@@ -64,7 +62,7 @@ class HomeViewModel(private val prefsStore: GamePrefsStore) : BaseViewModel() {
     private fun updateWinConditionList(boardSize: Int) {
         _winConditionList.clear()
 
-        for (i in 3..if(boardSize <= 8) boardSize else 8) {
+        for (i in 3..if (boardSize <= 8) boardSize else 8) {
             _winConditionList.add(i)
         }
     }

@@ -1,14 +1,12 @@
 package uk.fernando.tictactoe.datastore
 
-import kotlinx.coroutines.flow.Flow
-
 interface GamePrefsStore {
 
-    fun getBoardSize(): Flow<Int>
-    fun getWinCondition(): Flow<Int>
-    fun getRounds(): Flow<Int>
-    fun getGameType(): Flow<Int>
-    fun getDifficulty(): Flow<Int>
+    suspend fun getBoardSize(): Int
+    suspend fun getWinCondition(): Int
+    suspend fun getRounds(): Int
+    suspend fun getGameType(): Int
+    suspend fun getDifficulty(): Int
 
     suspend fun storeBoardSize(value: Int)
     suspend fun storeWinCondition(value: Int)

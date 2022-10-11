@@ -7,6 +7,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 
 private const val STORE_NAME = "tictactoe_game_data_store"
@@ -17,24 +18,24 @@ class GamePrefsStoreImpl(context: Context) : GamePrefsStore {
 
     private val dataStore = context.gameDataStore
 
-    override fun getBoardSize(): Flow<Int> {
-        return dataStore.data.map { prefs -> prefs[PreferencesKeys.BOARD_SIZE] ?: 5 }
+    override suspend fun getBoardSize(): Int {
+        return dataStore.data.map { prefs -> prefs[PreferencesKeys.BOARD_SIZE] ?: 5 }.first()
     }
 
-    override fun getWinCondition(): Flow<Int> {
-        return dataStore.data.map { prefs -> prefs[PreferencesKeys.WIN_CONDITION] ?: 4 }
+    override suspend fun getWinCondition(): Int {
+        return dataStore.data.map { prefs -> prefs[PreferencesKeys.WIN_CONDITION] ?: 4 }.first()
     }
 
-    override fun getRounds(): Flow<Int> {
-        return dataStore.data.map { prefs -> prefs[PreferencesKeys.ROUNDS] ?: 3 }
+    override suspend fun getRounds(): Int {
+        return dataStore.data.map { prefs -> prefs[PreferencesKeys.ROUNDS] ?: 3 }.first()
     }
 
-    override fun getGameType(): Flow<Int> {
-        return dataStore.data.map { prefs -> prefs[PreferencesKeys.GAME_TYPE] ?: 1 }
+    override suspend fun getGameType(): Int {
+        return dataStore.data.map { prefs -> prefs[PreferencesKeys.GAME_TYPE] ?: 1 }.first()
     }
 
-    override fun getDifficulty(): Flow<Int> {
-        return dataStore.data.map { prefs -> prefs[PreferencesKeys.DIFFICULTY] ?: 1 }
+    override suspend fun getDifficulty(): Int {
+        return dataStore.data.map { prefs -> prefs[PreferencesKeys.DIFFICULTY] ?: 1 }.first()
     }
 
     override suspend fun storeBoardSize(value: Int) {
