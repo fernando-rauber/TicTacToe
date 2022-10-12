@@ -25,5 +25,6 @@
 
     // Game
     <string name="score">%1$d "&#8195;" Score "&#8195;"  %2$d</string>
+    <string name="current_round">Round %1$d - %2$d</string>
 
 </resources>

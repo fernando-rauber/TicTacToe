@@ -7,13 +7,16 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -24,9 +27,12 @@ import androidx.navigation.NavController
 import org.koin.androidx.compose.getViewModel
 import uk.fernando.tictactoe.R
 import uk.fernando.tictactoe.component.NavigationTopBar
+import uk.fernando.tictactoe.component.WinConditionIcon
 import uk.fernando.tictactoe.model.CardModel
 import uk.fernando.tictactoe.theme.dark
 import uk.fernando.tictactoe.viewmodel.GameViewModel
+import uk.fernando.util.component.MyAnimatedVisibility
+import uk.fernando.util.ext.clickableSingle
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -56,9 +62,29 @@ fun GamePage(
             }
         })
 
-        Spacer(Modifier.weight(1f))
+        Box(
+            modifier = Modifier.weight(1f),
+            contentAlignment = Center
+        ) {
 
-        //Board(viewModel)
+            MyAnimatedVisibility(viewModel.boardSize.value != null) {
+                Column(
+                    horizontalAlignment = CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    WinConditionIcon(viewModel.winCondition.value)
+
+                    Board(viewModel)
+
+                    Text(
+                        text = stringResource(R.string.current_round, viewModel.currentRound.value, viewModel.rounds.value),
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onBackground,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+            }
+        }
 
         BottomBar(viewModel)
     }
@@ -67,11 +93,13 @@ fun GamePage(
 @Composable
 private fun Board(viewModel: GameViewModel) {
     LazyVerticalGrid(
-        modifier = Modifier.padding(46.dp),
-        columns = GridCells.Fixed(viewModel.boardSize.value),
+        modifier = Modifier.padding(horizontal = 42.dp, vertical = 20.dp),
+        columns = GridCells.Fixed(viewModel.boardSize.value ?: 3),
         content = {
-            items(viewModel.gamePosition) { position ->
-                GameCard(position)
+            itemsIndexed(viewModel.gamePosition) { index, position ->
+                GameCard(position) {
+                    viewModel.onPositionClick(index)
+                }
             }
         }
     )
@@ -105,6 +133,7 @@ private fun BottomBar(viewModel: GameViewModel) {
                     Modifier
                         .weight(1f)
                         .fillMaxHeight()
+                        .shadow(4.dp, RoundedCornerShape(topEndPercent = 50))
                         .background(dark, RoundedCornerShape(topEndPercent = 50))
                 ) {
                     PLayerName(
@@ -116,6 +145,9 @@ private fun BottomBar(viewModel: GameViewModel) {
 
                 Spacer(Modifier.width(8.dp))
 
+                Card() {
+
+                }
                 Box(
                     Modifier
                         .weight(1f)
@@ -183,12 +215,24 @@ private fun PLayerName(modifier: Modifier, @DrawableRes icon: Int, name: String)
 }
 
 @Composable
-private fun GameCard(position: CardModel) {
+private fun GameCard(position: CardModel, onClick: () -> Unit) {
     Box(
         Modifier
             .fillMaxSize()
             .aspectRatio(1f)
+            .clickableSingle { onClick() }
     ) {
+
+
+        position.image?.let { image ->
+            Image(
+                modifier = Modifier
+                    .align(Center)
+                    .fillMaxSize(.6f),
+                painter = painterResource(image),
+                contentDescription = null,
+            )
+        }
 
         if (position.showBarBottom)
             Box(
