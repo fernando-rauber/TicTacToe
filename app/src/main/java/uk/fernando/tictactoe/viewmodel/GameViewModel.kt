@@ -1,12 +1,14 @@
 package uk.fernando.tictactoe.viewmodel
 
+import android.util.Log
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import uk.fernando.tictactoe.R
 import uk.fernando.tictactoe.datastore.GamePrefsStore
 import uk.fernando.tictactoe.model.CardModel
+import uk.fernando.tictactoe.usecase.GameUseCase
 
-class GameViewModel(private val prefsStore: GamePrefsStore) : BaseViewModel() {
+class GameViewModel(private val prefsStore: GamePrefsStore, private val useCase: GameUseCase) : BaseViewModel() {
 
     val boardSize = mutableStateOf<Int?>(null)
     val winCondition = mutableStateOf(3)
@@ -32,6 +34,8 @@ class GameViewModel(private val prefsStore: GamePrefsStore) : BaseViewModel() {
     fun onPositionClick(position: Int) {
         if (_gamePosition[position].image == null) {
             _gamePosition[position] = _gamePosition[position].copy(image = getPlayerImage())
+            val checkBoard = useCase.validateBoardVertical(_gamePosition, 3)
+            Log.e("******", "Do we have a winner $checkBoard ", )
         }
     }
 

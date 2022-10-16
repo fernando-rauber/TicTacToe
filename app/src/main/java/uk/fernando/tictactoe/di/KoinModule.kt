@@ -9,6 +9,7 @@ import uk.fernando.tictactoe.datastore.GamePrefsStore
 import uk.fernando.tictactoe.datastore.GamePrefsStoreImpl
 import uk.fernando.tictactoe.datastore.PrefsStore
 import uk.fernando.tictactoe.datastore.PrefsStoreImpl
+import uk.fernando.tictactoe.usecase.GameUseCase
 import uk.fernando.tictactoe.viewmodel.GameViewModel
 import uk.fernando.tictactoe.viewmodel.HomeViewModel
 
@@ -29,7 +30,7 @@ object KoinModule {
 
     private val useCaseModule: Module
         get() = module {
-//            single { GetCategoryListUseCase(get()) }
+            single { GameUseCase() }
 //            single { UpdateLevelUseCase(get(), get()) }
 //            single { PurchaseUseCase(androidApplication(), get(), get()) }
 //            single { SetUpUseCase(get(), get(), get()) }
@@ -39,7 +40,7 @@ object KoinModule {
         get() = module {
 
             viewModel { HomeViewModel(get()) }
-            viewModel { GameViewModel(get()) }
+            viewModel { GameViewModel(get(), get()) }
         }
 
 //    fun getAndroidLogger(): MyLogger {
