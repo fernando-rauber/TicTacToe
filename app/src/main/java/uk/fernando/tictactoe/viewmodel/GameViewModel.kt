@@ -34,7 +34,7 @@ class GameViewModel(private val prefsStore: GamePrefsStore, private val useCase:
     fun onPositionClick(position: Int) {
         if (_gamePosition[position].image == null) {
             _gamePosition[position] = _gamePosition[position].copy(image = getPlayerImage())
-            val checkBoard = useCase.validateBoardVertical(_gamePosition, 3)
+            val checkBoard = useCase.validateBoardDiagonal(_gamePosition, 3)
             Log.e("******", "Do we have a winner $checkBoard ", )
         }
     }
