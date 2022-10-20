@@ -1,5 +1,6 @@
 package uk.fernando.tictactoe.usecase
 
+import android.util.Log
 import uk.fernando.tictactoe.model.CardModel
 import kotlin.math.sqrt
 
@@ -134,6 +135,47 @@ class GameUseCase {
                     }
                 }
             }
+        }
+
+        return 0
+    }
+
+    fun validateTopEndTopStart(list: List<CardModel>, winCondition: Int): Int {
+        val boardSize = sqrt(list.size.toDouble()).toInt()
+
+        val max = boardSize - winCondition
+        val map = mutableMapOf<Int, Counter>()
+
+        var row = 1
+
+        list.forEachIndexed { index, value ->
+            if (index >= boardSize * row)
+                row += 1
+
+            if (index in (max ) until boardSize) {
+                map[index] = (Counter(lastValue = value.image, if (value.image != null) 1 else 0)) //3
+            } else if (row > 1) {
+                kotlin.runCatching {
+
+                    // 0  1  2  3  4
+                    // 5  6  7  8  9
+                    // 10 11 12 13 14
+                    // 15 16 17 18 19
+                    // 20 21 22 23 24
+
+                    val indexCounter = index - (((row - 1) * boardSize) - (row - 1))
+
+                    val counter = map[indexCounter]
+
+                    if (counter != null) {
+                        map[indexCounter] = validateCell(value, counter)
+
+                        if (map[indexCounter]?.counter == winCondition)
+                            return counter.lastValue!!
+                    }
+                }
+            }
+
         }
 
         return 0
