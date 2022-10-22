@@ -1,11 +1,11 @@
 package uk.fernando.tictactoe.viewmodel
 
-import android.util.Log
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import uk.fernando.tictactoe.R
 import uk.fernando.tictactoe.datastore.GamePrefsStore
-import uk.fernando.tictactoe.model.CardModel
+import uk.fernando.tictactoe.model.CellModel
+import uk.fernando.tictactoe.usecase.Counter
 import uk.fernando.tictactoe.usecase.GameUseCase
 
 class GameViewModel(private val prefsStore: GamePrefsStore, private val useCase: GameUseCase) : BaseViewModel() {
@@ -17,8 +17,8 @@ class GameViewModel(private val prefsStore: GamePrefsStore, private val useCase:
 
     private var lastPlayer = R.drawable.img_o
 
-    private val _gamePosition = mutableStateListOf<CardModel>()
-    val gamePosition: List<CardModel> = _gamePosition
+    private val _gamePosition = mutableStateListOf<CellModel>()
+    val gamePosition: List<CellModel> = _gamePosition
 
     init {
         launchDefault {
@@ -34,19 +34,27 @@ class GameViewModel(private val prefsStore: GamePrefsStore, private val useCase:
     fun onPositionClick(position: Int) {
         if (_gamePosition[position].image == null) {
             _gamePosition[position] = _gamePosition[position].copy(image = getPlayerImage())
-            val checkBoard = useCase.validateBoardDiagonal(_gamePosition, 3)
-            Log.e("******", "Do we have a winner $checkBoard ", )
+
+            useCase.validateBoard(_gamePosition, 3)?.let {
+                updateWinnerCells(it)
+            }
+        }
+    }
+
+    private fun updateWinnerCells(counter: Counter){
+        counter.ids.forEach { position ->
+            _gamePosition[position] = _gamePosition[position].copy(direction = counter.direction)
         }
     }
 
     private fun createCards(boardSize: Int) {
         val boardSizeTotal = boardSize * boardSize
 
-        val list = mutableListOf<CardModel>()
+        val list = mutableListOf<CellModel>()
 
         for (position in 0 until boardSizeTotal) {
             list.add(
-                CardModel(
+                CellModel(
                     showBarLeft = position % boardSize < boardSize - 1,
                     showBarBottom = position < (boardSizeTotal - boardSize)
                 )

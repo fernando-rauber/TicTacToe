@@ -6,7 +6,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -16,6 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -28,7 +28,8 @@ import org.koin.androidx.compose.getViewModel
 import uk.fernando.tictactoe.R
 import uk.fernando.tictactoe.component.NavigationTopBar
 import uk.fernando.tictactoe.component.WinConditionIcon
-import uk.fernando.tictactoe.model.CardModel
+import uk.fernando.tictactoe.ext.getRotation
+import uk.fernando.tictactoe.model.CellModel
 import uk.fernando.tictactoe.theme.dark
 import uk.fernando.tictactoe.viewmodel.GameViewModel
 import uk.fernando.util.component.MyAnimatedVisibility
@@ -215,7 +216,7 @@ private fun PLayerName(modifier: Modifier, @DrawableRes icon: Int, name: String)
 }
 
 @Composable
-private fun GameCard(position: CardModel, onClick: () -> Unit) {
+private fun GameCard(position: CellModel, onClick: () -> Unit) {
     Box(
         Modifier
             .fillMaxSize()
@@ -231,6 +232,17 @@ private fun GameCard(position: CardModel, onClick: () -> Unit) {
                     .fillMaxSize(.6f),
                 painter = painterResource(image),
                 contentDescription = null,
+            )
+        }
+
+        position.direction?.let {
+            Box(
+                Modifier
+                    .rotate(it.getRotation())
+                    .fillMaxWidth()
+                    .height(3.dp)
+                    .background(Color.White.copy(.5f))
+                    .align(Center)
             )
         }
 
