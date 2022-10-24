@@ -1,6 +1,7 @@
 package uk.fernando.tictactoe.screen
 
 import androidx.annotation.DrawableRes
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -15,16 +16,14 @@ import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Alignment.Companion.End
 import androidx.compose.ui.Alignment.Companion.TopCenter
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -32,26 +31,21 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.max
-import androidx.compose.ui.unit.sp
-import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
-import kotlinx.coroutines.launch
 import org.koin.androidx.compose.getViewModel
 import uk.fernando.tictactoe.R
 import uk.fernando.tictactoe.component.MyDivider
 import uk.fernando.tictactoe.component.NavigationTopBar
 import uk.fernando.tictactoe.component.WinConditionIcon
-import uk.fernando.tictactoe.ext.getRotation
+import uk.fernando.tictactoe.ext.getEndOffset
+import uk.fernando.tictactoe.ext.getStartOffset
 import uk.fernando.tictactoe.model.CellModel
-import uk.fernando.tictactoe.navigation.Directions
 import uk.fernando.tictactoe.theme.dark
 import uk.fernando.tictactoe.theme.greenLight
 import uk.fernando.tictactoe.viewmodel.GameViewModel
 import uk.fernando.util.component.MyAnimatedVisibility
 import uk.fernando.util.component.MyButton
 import uk.fernando.util.ext.clickableSingle
-import uk.fernando.util.ext.safeNav
 import kotlin.math.ceil
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
@@ -332,14 +326,14 @@ private fun GameCell(position: CellModel, onClick: () -> Unit) {
         }
 
         position.direction?.let {
-            Box(
-                Modifier
-                    .rotate(it.getRotation())
-                    .fillMaxWidth()
-                    .height(4.dp)
-                    .background(Color.White.copy(.7f))
-                    .align(Center)
-            )
+            Canvas(modifier = Modifier.fillMaxSize()) {
+                drawLine(
+                    start = it.getStartOffset(size.width),
+                    end = it.getEndOffset(size.width),
+                    color = Color.White,
+                    strokeWidth = 10f
+                )
+            }
         }
 
         if (position.showBarBottom)
