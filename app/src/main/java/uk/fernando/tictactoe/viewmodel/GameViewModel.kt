@@ -1,11 +1,16 @@
 package uk.fernando.tictactoe.viewmodel
 
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import kotlinx.coroutines.delay
 import uk.fernando.tictactoe.R
 import uk.fernando.tictactoe.datastore.GamePrefsStore
+import uk.fernando.tictactoe.ext.isPlayerX
 import uk.fernando.tictactoe.model.CellModel
-import uk.fernando.tictactoe.usecase.Counter
+import uk.fernando.tictactoe.model.Counter
+import uk.fernando.tictactoe.model.Player
 import uk.fernando.tictactoe.usecase.GameUseCase
 
 class GameViewModel(private val prefsStore: GamePrefsStore, private val useCase: GameUseCase) : BaseViewModel() {
@@ -14,6 +19,12 @@ class GameViewModel(private val prefsStore: GamePrefsStore, private val useCase:
     val winCondition = mutableStateOf(3)
     val rounds = mutableStateOf(3)
     val currentRound = mutableStateOf(1)
+
+    val player1 = mutableStateOf(Player(R.drawable.ic_unicorn, "You"))
+    val player2 = mutableStateOf(Player(R.drawable.ic_chick, "Deon"))
+    val playerWinner = mutableStateOf(Player(R.drawable.ic_unicorn, "You"))
+
+    val endRoundDialog = mutableStateOf(false)
 
     private var lastPlayer = R.drawable.img_o
 
@@ -24,7 +35,7 @@ class GameViewModel(private val prefsStore: GamePrefsStore, private val useCase:
         launchDefault {
             boardSize.value = prefsStore.getBoardSize()
             winCondition.value = prefsStore.getWinCondition()
-//            rounds.value = prefsStore.getRounds()
+            rounds.value = prefsStore.getRounds()
 //            gameType.value = prefsStore.getGameType()
 //            difficulty.value = prefsStore.getDifficulty()
             createCards(boardSize.value!!)
@@ -32,19 +43,47 @@ class GameViewModel(private val prefsStore: GamePrefsStore, private val useCase:
     }
 
     fun onPositionClick(position: Int) {
+        if (endRoundDialog.value) {
+            launchDefault {
+                endRoundDialog.value = false
+                delay(100)
+                endRoundDialog.value = true
+            }
+            return
+        }
+
         if (_gamePosition[position].image == null) {
             _gamePosition[position] = _gamePosition[position].copy(image = getPlayerImage())
 
-            useCase.validateBoard(_gamePosition, 3)?.let {
+            useCase.validateBoard(_gamePosition, winCondition.value)?.let {
+                playerWinner.value =  if(it.value!!.isPlayerX()) {
+                    player1.value.score++
+                    player1.value
+                } else {
+                    player2.value.score++
+                    player2.value
+                }
+
                 updateWinnerCells(it)
             }
         }
     }
 
-    private fun updateWinnerCells(counter: Counter){
+    private fun updateWinnerCells(counter: Counter) {
         counter.ids.forEach { position ->
             _gamePosition[position] = _gamePosition[position].copy(direction = counter.direction)
         }
+        // Display Bottom sheet 'Next Round'
+        endRoundDialog.value = true
+    }
+
+    fun startNextRound() {
+        (0 until _gamePosition.size).forEach { index ->
+            _gamePosition[index] = _gamePosition[index].copy(image = null, direction = null)
+        }
+
+        currentRound.value++
+        endRoundDialog.value = false
     }
 
     private fun createCards(boardSize: Int) {

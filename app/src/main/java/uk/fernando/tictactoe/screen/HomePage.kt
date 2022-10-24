@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import org.koin.androidx.compose.getViewModel
 import uk.fernando.tictactoe.R
+import uk.fernando.tictactoe.component.MyDivider
 import uk.fernando.tictactoe.component.NavigationTopBar
 import uk.fernando.tictactoe.component.WinConditionIcon
 import uk.fernando.tictactoe.navigation.Directions
@@ -237,13 +238,5 @@ private fun MyChip(text: String, isSelected: Boolean, color: Color = dark, onCli
             textAlign = TextAlign.Center
         )
     }
-}
-
-@Composable
-private fun MyDivider() {
-    Divider(
-        modifier = Modifier.padding(vertical = 8.dp),
-        color = greyLight.copy(0.3f)
-    )
 }
 

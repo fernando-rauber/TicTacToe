@@ -9,11 +9,19 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ModalBottomSheetLayout
+import androidx.compose.material.ModalBottomSheetValue
+import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
+import androidx.compose.ui.Alignment.Companion.End
+import androidx.compose.ui.Alignment.Companion.TopCenter
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.shadow
@@ -22,72 +30,160 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.max
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
+import kotlinx.coroutines.launch
 import org.koin.androidx.compose.getViewModel
 import uk.fernando.tictactoe.R
+import uk.fernando.tictactoe.component.MyDivider
 import uk.fernando.tictactoe.component.NavigationTopBar
 import uk.fernando.tictactoe.component.WinConditionIcon
 import uk.fernando.tictactoe.ext.getRotation
 import uk.fernando.tictactoe.model.CellModel
+import uk.fernando.tictactoe.navigation.Directions
 import uk.fernando.tictactoe.theme.dark
+import uk.fernando.tictactoe.theme.greenLight
 import uk.fernando.tictactoe.viewmodel.GameViewModel
 import uk.fernando.util.component.MyAnimatedVisibility
+import uk.fernando.util.component.MyButton
 import uk.fernando.util.ext.clickableSingle
+import uk.fernando.util.ext.safeNav
+import kotlin.math.ceil
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 @Composable
 fun GamePage(
     navController: NavController = NavController(LocalContext.current),
     viewModel: GameViewModel = getViewModel()
 ) {
+    val sheetState = rememberModalBottomSheetState(
+        initialValue = if (viewModel.endRoundDialog.value) ModalBottomSheetValue.Expanded else ModalBottomSheetValue.Hidden,
+        confirmStateChange = { it != ModalBottomSheetValue.HalfExpanded }
+    )
 
-    Column(Modifier.fillMaxSize()) {
+    ModalBottomSheetLayout(
+        sheetState = sheetState,
+        sheetContent = {
+            BottomSheetEndRound(
+                viewModel = viewModel,
+                onClose = { navController.popBackStack() }
+            )
+        },
+        sheetBackgroundColor = Color.Transparent,
+        modifier = Modifier.fillMaxSize()
+    ) {
+        Column(Modifier.fillMaxSize()) {
 
-        NavigationTopBar(rightIcon = {
-            Card(
-                modifier = Modifier
-                    .align(Alignment.CenterEnd)
-                    .padding(end = 8.dp),
-                onClick = { navController.popBackStack() },
-                shape = CircleShape,
-                elevation = CardDefaults.cardElevation(4.dp),
-                colors = CardDefaults.cardColors(Color.White),
-            ) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_close),
-                    modifier = Modifier.padding(8.dp),
-                    contentDescription = null,
-                    tint = Color.Black.copy(.7f)
-                )
-            }
-        })
-
-        Box(
-            modifier = Modifier.weight(1f),
-            contentAlignment = Center
-        ) {
-
-            MyAnimatedVisibility(viewModel.boardSize.value != null) {
-                Column(
-                    horizontalAlignment = CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
+            NavigationTopBar(rightIcon = {
+                Card(
+                    modifier = Modifier
+                        .align(Alignment.CenterEnd)
+                        .padding(end = 8.dp),
+                    onClick = { navController.popBackStack() },
+                    shape = CircleShape,
+                    elevation = CardDefaults.cardElevation(4.dp),
+                    colors = CardDefaults.cardColors(Color.White),
                 ) {
-                    WinConditionIcon(viewModel.winCondition.value)
-
-                    Board(viewModel)
-
-                    Text(
-                        text = stringResource(R.string.current_round, viewModel.currentRound.value, viewModel.rounds.value),
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onBackground,
-                        fontWeight = FontWeight.SemiBold
+                    Icon(
+                        painter = painterResource(R.drawable.ic_close),
+                        modifier = Modifier.padding(8.dp),
+                        contentDescription = null,
+                        tint = Color.Black.copy(.7f)
                     )
                 }
-            }
-        }
+            })
 
-        BottomBar(viewModel)
+            Box(
+                modifier = Modifier.weight(1f),
+                contentAlignment = Center
+            ) {
+
+                MyAnimatedVisibility(viewModel.boardSize.value != null) {
+                    Column(
+                        horizontalAlignment = CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        WinConditionIcon(viewModel.winCondition.value)
+
+                        Board(viewModel)
+
+                        Text(
+                            text = stringResource(R.string.current_round, viewModel.currentRound.value, viewModel.rounds.value),
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onBackground,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
+                }
+            }
+
+            BottomBar(viewModel)
+        }
+    }
+}
+
+@Composable
+private fun BottomSheetEndRound(viewModel: GameViewModel, onClose: () -> Unit) {
+    val isEndGame = viewModel.playerWinner.value.score >= ceil(viewModel.rounds.value / 2f)
+
+    Surface(
+        shape = RoundedCornerShape(topStartPercent = 15, topEndPercent = 15),
+        contentColor = dark
+    ) {
+        Column(Modifier.padding(16.dp)) {
+
+            Row(verticalAlignment = Alignment.CenterVertically) {
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(.3f)
+                        .padding(top = 15.dp)
+                ) {
+                    Icon(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .aspectRatio(1f),
+                        painter = painterResource(viewModel.playerWinner.value.avatar),
+                        contentDescription = null,
+                        tint = Color.Unspecified
+                    )
+                    Icon(
+                        modifier = Modifier
+                            .fillMaxWidth(.5f)
+                            .aspectRatio(1f)
+                            .align(TopCenter)
+                            .offset(y = (-20).dp),
+                        painter = painterResource(R.drawable.ic_crown),
+                        contentDescription = null,
+                        tint = Color.Unspecified
+                    )
+                }
+
+                Text(
+                    modifier = Modifier.fillMaxWidth(),
+                    text = stringResource(if (isEndGame) R.string.player_win else R.string.player_win_round, viewModel.playerWinner.value.name),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    fontWeight = FontWeight.SemiBold,
+                    textAlign = TextAlign.Center
+                )
+            }
+
+            MyDivider(Modifier.padding(vertical = 16.dp))
+
+            MyButton(
+                modifier = Modifier
+                    .align(End)
+                    .defaultMinSize(minHeight = 50.dp),
+                text = stringResource(if (isEndGame) R.string.close_action else R.string.next_round_action).uppercase(),
+                color = greenLight,
+                onClick = if (isEndGame) onClose else viewModel::startNextRound
+            )
+        }
     }
 }
 
@@ -98,7 +194,7 @@ private fun Board(viewModel: GameViewModel) {
         columns = GridCells.Fixed(viewModel.boardSize.value ?: 3),
         content = {
             itemsIndexed(viewModel.gamePosition) { index, position ->
-                GameCard(position) {
+                GameCell(position) {
                     viewModel.onPositionClick(index)
                 }
             }
@@ -124,7 +220,7 @@ private fun BottomBar(viewModel: GameViewModel) {
                 modifier = Modifier
                     .align(CenterHorizontally)
                     .padding(bottom = 5.dp),
-                text = stringResource(R.string.score, 1, 0),
+                text = stringResource(R.string.score, viewModel.player1.value.score, viewModel.player2.value.score),
                 color = Color.White,
                 style = MaterialTheme.typography.bodyMedium
             )
@@ -140,7 +236,7 @@ private fun BottomBar(viewModel: GameViewModel) {
                     PLayerName(
                         modifier = Modifier.align(Alignment.CenterEnd),
                         icon = R.drawable.img_x,
-                        name = "YOU"
+                        name = viewModel.player1.value.name
                     )
                 }
 
@@ -159,7 +255,7 @@ private fun BottomBar(viewModel: GameViewModel) {
                     PLayerName(
                         modifier = Modifier.align(Alignment.CenterStart),
                         icon = R.drawable.img_o,
-                        name = "AI"
+                        name = viewModel.player2.value.name
                     )
                 }
             }
@@ -167,7 +263,7 @@ private fun BottomBar(viewModel: GameViewModel) {
 
         Row(
             Modifier
-                .align(Alignment.TopCenter)
+                .align(TopCenter)
                 .fillMaxHeight(0.8f)
         ) {
 
@@ -175,7 +271,7 @@ private fun BottomBar(viewModel: GameViewModel) {
                 modifier = Modifier
                     .fillMaxHeight()
                     .aspectRatio(1f),
-                painter = painterResource(R.drawable.ic_deer),
+                painter = painterResource(viewModel.player1.value.avatar),
                 contentDescription = null,
                 tint = Color.Unspecified
             )
@@ -186,7 +282,7 @@ private fun BottomBar(viewModel: GameViewModel) {
                 modifier = Modifier
                     .fillMaxHeight()
                     .aspectRatio(1f),
-                painter = painterResource(R.drawable.ic_unicorn),
+                painter = painterResource(viewModel.player2.value.avatar),
                 contentDescription = null,
                 tint = Color.Unspecified
             )
@@ -216,7 +312,7 @@ private fun PLayerName(modifier: Modifier, @DrawableRes icon: Int, name: String)
 }
 
 @Composable
-private fun GameCard(position: CellModel, onClick: () -> Unit) {
+private fun GameCell(position: CellModel, onClick: () -> Unit) {
     Box(
         Modifier
             .fillMaxSize()
@@ -240,8 +336,8 @@ private fun GameCard(position: CellModel, onClick: () -> Unit) {
                 Modifier
                     .rotate(it.getRotation())
                     .fillMaxWidth()
-                    .height(3.dp)
-                    .background(Color.White.copy(.5f))
+                    .height(4.dp)
+                    .background(Color.White.copy(.7f))
                     .align(Center)
             )
         }
