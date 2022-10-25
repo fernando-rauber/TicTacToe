@@ -70,8 +70,12 @@ class GameViewModel(private val prefsStore: GamePrefsStore, private val useCase:
     }
 
     private fun updateWinnerCells(counter: Counter) {
-        counter.ids.forEach { position ->
-            _gamePosition[position] = _gamePosition[position].copy(direction = counter.direction)
+        counter.ids.forEachIndexed { index, position ->
+            _gamePosition[position] = _gamePosition[position].copy(
+                direction = counter.direction,
+                paddingStart = index == 0,
+                paddingEnd = index == (winCondition.value - 1)
+            )
         }
         // Display Bottom sheet 'Next Round'
         endRoundDialog.value = true

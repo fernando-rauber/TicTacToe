@@ -269,7 +269,7 @@ private fun BottomBar(viewModel: GameViewModel) {
 }
 
 @Composable
-private fun BottomBarAvatar(avatar: Int, isPlayerTurn: Boolean){
+private fun BottomBarAvatar(avatar: Int, isPlayerTurn: Boolean) {
     Column(horizontalAlignment = CenterHorizontally) {
 
         Box {
@@ -278,7 +278,7 @@ private fun BottomBarAvatar(avatar: Int, isPlayerTurn: Boolean){
                 modifier = Modifier.align(TopCenter),
                 painter = painterResource(R.drawable.ic_arrow_drop),
                 contentDescription = null,
-                tint = if(isPlayerTurn) Color.White else Color.Transparent
+                tint = if (isPlayerTurn) Color.White else Color.Transparent
             )
         }
 
@@ -335,10 +335,10 @@ private fun GameCell(position: CellModel, onClick: () -> Unit) {
         }
 
         position.direction?.let {
-            Canvas(modifier = Modifier.fillMaxSize()) {
+            Canvas(Modifier.fillMaxSize()) {
                 drawLine(
-                    start = it.getStartOffset(size.width),
-                    end = it.getEndOffset(size.width),
+                    start = it.getStartOffset(size.width, position.paddingStart),
+                    end = it.getEndOffset(size.width,  position.paddingEnd),
                     color = Color.White,
                     strokeWidth = 10f,
                     alpha = .8f

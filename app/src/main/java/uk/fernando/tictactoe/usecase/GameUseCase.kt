@@ -130,7 +130,7 @@ class GameUseCase {
 
         val map = mutableMapOf<Int, Counter>()
 
-        var nextRow = 2
+        var nextRow = 1
 
         while (nextRow <= boardSize) {
 
