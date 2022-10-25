@@ -218,12 +218,13 @@ class GameUseCase {
     }
 }
 
-private fun validateCell(value: Int?, counter: Counter, index: Int): Counter {
-    value?.let {
-        if (counter.value != value)
-            counter.firstValue(value, index)
-        else
-            counter.increaseCounter(index)
-    }
+private fun validateCell(cellValue: Int?, counter: Counter, index: Int): Counter {
+    if (cellValue == null)
+        counter.reset()
+    else if (counter.value != cellValue)
+        counter.firstValue(cellValue, index)
+    else
+        counter.increaseCounter(index)
+
     return counter
 }

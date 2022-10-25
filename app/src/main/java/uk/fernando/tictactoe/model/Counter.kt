@@ -17,12 +17,16 @@ data class Counter(
             ids.add(index)
         } else
             counter = 0
+    }
 
+    fun reset() {
+        value = null
+        ids.clear()
+        counter = 0
     }
 
     fun increaseCounter(index: Int) {
         counter++
         ids.add(index)
     }
-
 }
