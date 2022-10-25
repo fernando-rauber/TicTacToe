@@ -93,51 +93,7 @@ class GameUseCase {
         return validateTopEndTopStart(list, winCondition)
     }
 
-//    private fun validateTopStartBottomStart(list: List<CardModel>, winCondition: Int): Counter? {
-//        val boardSize = sqrt(list.size.toDouble()).toInt()
-//
-//        val map = mutableMapOf<Int, Counter>()
-//
-//        var row = 1
-//
-//        list.forEachIndexed { index, value ->
-//            if (index >= boardSize * row)
-//                row += 1
-//
-//            if (row > 1) {
-//                if (index % boardSize == 0) {
-//                    map[index] = (Counter(lastValue = value.image, if (value.image != null) 1 else 0))
-//                } else {
-//
-//                    kotlin.runCatching {
-//                        val indexCounterTop = index - ((boardSize * (row - 2)) + row - 2)
-//                        val counterTop = map[indexCounterTop]
-//
-//                        if (counterTop != null) {
-//                            map[indexCounterTop] = validateCell(value, counterTop)
-//
-//                            if (map[indexCounterTop]?.counter == winCondition)
-//                                return counterTop.lastValue!!
-//                        }
-//
-//                        val indexCounterBottom = index - (6 * (row - 3))
-//                        val counterBottom = map[indexCounterBottom]
-//
-//                        if (counterBottom != null) {
-//                            map[indexCounterBottom] = validateCell(value, counterBottom)
-//
-//                            if (map[indexCounterBottom]?.counter == winCondition)
-//                                return counterBottom.lastValue!!
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//
-//        return 0
-//    }
-
-    fun validateTopEndTopStart(list: List<CellModel>, winCondition: Int): Counter? {
+    private fun validateTopEndTopStart(list: List<CellModel>, winCondition: Int): Counter? {
         val boardSize = sqrt(list.size.toDouble()).toInt()
 
         val map = mutableMapOf<Int, Counter>()
@@ -166,10 +122,56 @@ class GameUseCase {
             }
         }
 
+        return validateTopStartBottomStart(list, winCondition)
+    }
+
+    private fun validateTopStartBottomStart(list: List<CellModel>, winCondition: Int): Counter? {
+        val boardSize = sqrt(list.size.toDouble()).toInt()
+
+        val map = mutableMapOf<Int, Counter>()
+
+        var nextRow = 2
+
+        while (nextRow <= boardSize) {
+
+            var row = nextRow
+            var rowSupporter = 0
+
+            list.forEachIndexed { index, cell ->
+
+                if (index >= (boardSize * nextRow) - 1) {
+
+                    if (index % boardSize == 0) {
+                        map[index] = Counter(WinnerDirection.START_TOP_END_BOTTOM).apply { firstValue(cell.image, index) }
+                    } else {
+                        kotlin.runCatching {
+
+                            val indexCounter = index - ((boardSize + 1) * rowSupporter)
+                            val diagonal = map[indexCounter]
+
+                            if (diagonal != null) {
+                                map[indexCounter] = validateCell(cell.image, diagonal, index)
+
+                                if (map[indexCounter]?.counter == winCondition)
+                                    return diagonal
+                            }
+                        }
+                    }
+
+                    if (index >= boardSize * row) {
+                        row++
+                        rowSupporter++
+                    }
+                }
+            }
+
+            nextRow++
+        }
+
         return validateTopEndBottomEnd(list, winCondition)
     }
 
-    fun validateTopEndBottomEnd(list: List<CellModel>, winCondition: Int): Counter? {
+    private fun validateTopEndBottomEnd(list: List<CellModel>, winCondition: Int): Counter? {
         val boardSize = sqrt(list.size.toDouble()).toInt()
 
         val map = mutableMapOf<Int, Counter>()

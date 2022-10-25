@@ -31,8 +31,8 @@ class GameViewModel(private val prefsStore: GamePrefsStore, private val useCase:
 
     init {
         launchDefault {
-            boardSize.value = prefsStore.getBoardSize()
-            winCondition.value = prefsStore.getWinCondition()
+            boardSize.value = 7// prefsStore.getBoardSize()
+            winCondition.value = 3//prefsStore.getWinCondition()
             rounds.value = prefsStore.getRounds()
 //            gameType.value = prefsStore.getGameType()
 //            difficulty.value = prefsStore.getDifficulty()
