@@ -23,7 +23,6 @@ import androidx.compose.ui.Alignment.Companion.End
 import androidx.compose.ui.Alignment.Companion.TopCenter
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -200,14 +199,14 @@ private fun Board(viewModel: GameViewModel) {
 private fun BottomBar(viewModel: GameViewModel) {
     Box(
         Modifier
-            .fillMaxHeight(0.20f)
+            .fillMaxHeight(0.25f)
             .fillMaxWidth()
     ) {
 
         Column(
             Modifier
                 .align(Alignment.BottomCenter)
-                .fillMaxHeight(0.8f)
+                .fillMaxHeight(0.6f)
         ) {
 
             Text(
@@ -258,29 +257,39 @@ private fun BottomBar(viewModel: GameViewModel) {
         Row(
             Modifier
                 .align(TopCenter)
-                .fillMaxHeight(0.8f)
+                .fillMaxHeight(0.9f)
         ) {
-
-            Icon(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .aspectRatio(1f),
-                painter = painterResource(viewModel.player1.value.avatar),
-                contentDescription = null,
-                tint = Color.Unspecified
-            )
+            BottomBarAvatar(viewModel.player1.value.avatar, viewModel.isPLayer1Turn.value)
 
             Spacer(Modifier.weight(1f))
 
+            BottomBarAvatar(viewModel.player2.value.avatar, !viewModel.isPLayer1Turn.value)
+        }
+    }
+}
+
+@Composable
+private fun BottomBarAvatar(avatar: Int, isPlayerTurn: Boolean){
+    Column(horizontalAlignment = CenterHorizontally) {
+
+        Box {
+
             Icon(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .aspectRatio(1f),
-                painter = painterResource(viewModel.player2.value.avatar),
+                modifier = Modifier.align(TopCenter),
+                painter = painterResource(R.drawable.ic_arrow_drop),
                 contentDescription = null,
-                tint = Color.Unspecified
+                tint = if(isPlayerTurn) Color.White else Color.Transparent
             )
         }
+
+        Icon(
+            modifier = Modifier
+                .fillMaxHeight(1f)
+                .aspectRatio(1f),
+            painter = painterResource(avatar),
+            contentDescription = null,
+            tint = Color.Unspecified
+        )
     }
 }
 
@@ -331,7 +340,8 @@ private fun GameCell(position: CellModel, onClick: () -> Unit) {
                     start = it.getStartOffset(size.width),
                     end = it.getEndOffset(size.width),
                     color = Color.White,
-                    strokeWidth = 10f
+                    strokeWidth = 10f,
+                    alpha = .8f
                 )
             }
         }

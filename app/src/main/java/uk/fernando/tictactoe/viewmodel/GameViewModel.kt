@@ -1,7 +1,5 @@
 package uk.fernando.tictactoe.viewmodel
 
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import kotlinx.coroutines.delay
@@ -26,7 +24,7 @@ class GameViewModel(private val prefsStore: GamePrefsStore, private val useCase:
 
     val endRoundDialog = mutableStateOf(false)
 
-    private var lastPlayer = R.drawable.img_o
+    val isPLayer1Turn = mutableStateOf(true)
 
     private val _gamePosition = mutableStateListOf<CellModel>()
     val gamePosition: List<CellModel> = _gamePosition
@@ -53,10 +51,12 @@ class GameViewModel(private val prefsStore: GamePrefsStore, private val useCase:
         }
 
         if (_gamePosition[position].image == null) {
-            _gamePosition[position] = _gamePosition[position].copy(image = getPlayerImage())
+            _gamePosition[position] = _gamePosition[position].copy(image = if (isPLayer1Turn.value) R.drawable.img_x else R.drawable.img_o)
+
+            isPLayer1Turn.value = !isPLayer1Turn.value // Next Player
 
             useCase.validateBoard(_gamePosition, winCondition.value)?.let {
-                playerWinner.value =  if(it.value!!.isPlayerX()) {
+                playerWinner.value = if (it.value!!.isPlayerX()) {
                     player1.value.score++
                     player1.value
                 } else {
@@ -101,14 +101,5 @@ class GameViewModel(private val prefsStore: GamePrefsStore, private val useCase:
         }
 
         _gamePosition.addAll(list)
-    }
-
-    private fun getPlayerImage(): Int {
-        lastPlayer = if (lastPlayer == R.drawable.img_o)
-            R.drawable.img_x
-        else
-            R.drawable.img_o
-
-        return lastPlayer
     }
 }
