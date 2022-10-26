@@ -5,6 +5,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
@@ -38,6 +39,10 @@ class GamePrefsStoreImpl(context: Context) : GamePrefsStore {
         return dataStore.data.map { prefs -> prefs[PreferencesKeys.DIFFICULTY] ?: 1 }.first()
     }
 
+    override suspend fun getPLayer2Name(): String {
+        return dataStore.data.map { prefs -> prefs[PreferencesKeys.PLAYER2_NAME] ?: "Player 2" }.first()
+    }
+
     override suspend fun storeBoardSize(value: Int) {
         dataStore.edit { prefs -> prefs[PreferencesKeys.BOARD_SIZE] = value }
     }
@@ -58,11 +63,16 @@ class GamePrefsStoreImpl(context: Context) : GamePrefsStore {
         dataStore.edit { prefs -> prefs[PreferencesKeys.DIFFICULTY] = value }
     }
 
+    override suspend fun storePLayer2Name(value: String) {
+        dataStore.edit { prefs -> prefs[PreferencesKeys.PLAYER2_NAME] = value }
+    }
+
     private object PreferencesKeys {
         val BOARD_SIZE = intPreferencesKey("board_size")
         val WIN_CONDITION = intPreferencesKey("win_condition")
         val ROUNDS = intPreferencesKey("rounds")
         val GAME_TYPE = intPreferencesKey("game_type")
         val DIFFICULTY = intPreferencesKey("difficulty")
+        val PLAYER2_NAME = stringPreferencesKey("player2_name")
     }
 }

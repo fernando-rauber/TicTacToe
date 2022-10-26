@@ -11,6 +11,7 @@ class HomeViewModel(private val prefsStore: GamePrefsStore) : BaseViewModel() {
     val rounds = mutableStateOf(3)
     val gameType = mutableStateOf(1)
     val difficulty = mutableStateOf(1)
+    val playerName = mutableStateOf("Player 2")
 
     private val _winConditionList = mutableStateListOf<Int>()
     val winConditionList: List<Int> = _winConditionList
@@ -22,6 +23,7 @@ class HomeViewModel(private val prefsStore: GamePrefsStore) : BaseViewModel() {
             rounds.value = prefsStore.getRounds()
             gameType.value = prefsStore.getGameType()
             difficulty.value = prefsStore.getDifficulty()
+            playerName.value = prefsStore.getPLayer2Name()
 
             updateWinConditionList(boardSize.value)
         }
@@ -57,6 +59,10 @@ class HomeViewModel(private val prefsStore: GamePrefsStore) : BaseViewModel() {
     fun setDifficulty(value: Int) {
         difficulty.value = value
         launchDefault { prefsStore.storeDifficulty(value) }
+    }
+
+    fun setPlayerName(value: String) {
+        launchDefault { prefsStore.storePLayer2Name(value) }
     }
 
     private fun updateWinConditionList(boardSize: Int) {

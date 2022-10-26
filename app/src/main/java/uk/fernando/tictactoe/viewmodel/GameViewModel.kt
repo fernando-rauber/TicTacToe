@@ -31,16 +31,24 @@ class GameViewModel(private val prefsStore: GamePrefsStore, private val useCase:
 
     init {
         launchDefault {
-            boardSize.value = 7// prefsStore.getBoardSize()
-            winCondition.value = 3//prefsStore.getWinCondition()
+            boardSize.value = prefsStore.getBoardSize()
+            winCondition.value = prefsStore.getWinCondition()
             rounds.value = prefsStore.getRounds()
-//            gameType.value = prefsStore.getGameType()
-//            difficulty.value = prefsStore.getDifficulty()
+            val gameType = prefsStore.getGameType()
+
+            if (gameType == 1) { // Single player
+                //difficulty.value = prefsStore.getDifficulty()
+                player2.value = player2.value.copy(name = "AI")
+            } else { // Multiplayer
+                val player2Name = prefsStore.getPLayer2Name()
+                player2.value = player2.value.copy(name = player2Name)
+            }
+
             createCards(boardSize.value!!)
         }
     }
 
-    fun onPositionClick(position: Int) : Boolean{
+    fun onPositionClick(position: Int): Boolean {
         if (endRoundDialog.value) {
             launchDefault {
                 endRoundDialog.value = false

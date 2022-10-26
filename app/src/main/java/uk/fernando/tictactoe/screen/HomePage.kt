@@ -9,7 +9,7 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
@@ -24,6 +24,7 @@ import androidx.navigation.NavController
 import org.koin.androidx.compose.getViewModel
 import uk.fernando.tictactoe.R
 import uk.fernando.tictactoe.component.MyDivider
+import uk.fernando.tictactoe.component.MyTextField
 import uk.fernando.tictactoe.component.NavigationTopBar
 import uk.fernando.tictactoe.component.WinConditionIcon
 import uk.fernando.tictactoe.navigation.Directions
@@ -78,8 +79,10 @@ fun HomePage(
 
             MyDivider()
 
-            AIDifficulty(viewModel)
-
+            Box {
+                AIDifficulty(viewModel)
+                Player2Name(viewModel)
+            }
         }
 
         MyButton(
@@ -202,6 +205,31 @@ private fun AIDifficulty(viewModel: HomeViewModel) {
                     onClick = { viewModel.setDifficulty(3) }
                 )
             }
+        }
+    }
+}
+
+@Composable
+private fun Player2Name(viewModel: HomeViewModel) {
+    MyAnimatedVisibility(viewModel.gameType.value == 2) {
+
+        Column {
+            Text(
+                modifier = Modifier.padding(bottom = 5.dp),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onBackground,
+                text = stringResource(R.string.player_name)
+            )
+            MyTextField(
+                modifier = Modifier.fillMaxWidth(),
+                value = viewModel.playerName.value,
+                onValueChange = {
+                    if (it.length <= 15) {
+                        viewModel.setPlayerName(it)
+                        viewModel.playerName.value = it
+                    }
+                }
+            )
         }
     }
 }

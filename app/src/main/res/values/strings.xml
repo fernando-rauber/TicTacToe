@@ -30,5 +30,6 @@
     <string name="player_win_round">%s won this round</string>
     <string name="player_win">%s won</string>
     <string name="close_action">Close</string>
+    <string name="player_name">Player name</string>
 
 </resources>

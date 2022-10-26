@@ -185,7 +185,7 @@ private fun BottomSheetEndRound(viewModel: GameViewModel, onClose: () -> Unit) {
 
 @Composable
 private fun Board(viewModel: GameViewModel) {
-    val audio =  MediaPlayer.create(LocalContext.current, R.raw.sound_correct)
+    val audio = MediaPlayer.create(LocalContext.current, R.raw.sound_finish)
 
     LazyVerticalGrid(
         modifier = Modifier.padding(horizontal = 42.dp, vertical = 20.dp),
@@ -194,7 +194,7 @@ private fun Board(viewModel: GameViewModel) {
             itemsIndexed(viewModel.gamePosition) { index, position ->
                 GameCell(position) {
                     val isEndRound = viewModel.onPositionClick(index)
-                    if(isEndRound) audio.playAudio()
+                    if (isEndRound) audio.playAudio()
                 }
             }
         }
@@ -295,7 +295,9 @@ private fun BottomBarAvatar(avatar: Int, isPlayerTurn: Boolean) {
 @Composable
 private fun PLayerName(modifier: Modifier, @DrawableRes icon: Int, name: String) {
     Column(
-        modifier = modifier.fillMaxWidth(0.5f),
+        modifier = modifier
+            .fillMaxWidth(0.5f)
+            .padding(horizontal = 10.dp),
         horizontalAlignment = CenterHorizontally
     ) {
         Image(
@@ -308,7 +310,8 @@ private fun PLayerName(modifier: Modifier, @DrawableRes icon: Int, name: String)
             text = name,
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onBackground,
-            fontWeight = FontWeight.SemiBold
+            fontWeight = FontWeight.SemiBold,
+            textAlign = TextAlign.Center
         )
     }
 }
