@@ -2,6 +2,7 @@ package uk.fernando.tictactoe.screen
 
 import android.media.MediaPlayer
 import androidx.annotation.DrawableRes
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -17,6 +18,7 @@ import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
@@ -30,6 +32,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import org.koin.androidx.compose.getViewModel
@@ -274,8 +277,20 @@ private fun BottomBar(viewModel: GameViewModel) {
 private fun BottomBarAvatar(avatar: Int, isPlayerTurn: Boolean) {
     Column(horizontalAlignment = CenterHorizontally) {
 
+        val translation by rememberInfiniteTransition().animateValue(
+            initialValue = 10.dp,
+            targetValue = (-10).dp,
+            typeConverter = Dp.VectorConverter,
+            animationSpec = infiniteRepeatable(
+                animation = tween(450, easing = LinearEasing),
+                repeatMode = RepeatMode.Reverse
+            )
+        )
+
         Icon(
-            modifier = Modifier.align(CenterHorizontally),
+            modifier = Modifier
+                .align(CenterHorizontally)
+                .offset(y = translation),
             painter = painterResource(R.drawable.ic_arrow_drop),
             contentDescription = null,
             tint = if (isPlayerTurn) Color.White else Color.Transparent
