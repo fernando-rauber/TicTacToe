@@ -1,5 +1,6 @@
 package uk.fernando.tictactoe.screen
 
+import android.media.MediaPlayer
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
@@ -45,6 +46,7 @@ import uk.fernando.tictactoe.viewmodel.GameViewModel
 import uk.fernando.util.component.MyAnimatedVisibility
 import uk.fernando.util.component.MyButton
 import uk.fernando.util.ext.clickableSingle
+import uk.fernando.util.ext.playAudio
 import kotlin.math.ceil
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
@@ -53,6 +55,7 @@ fun GamePage(
     navController: NavController = NavController(LocalContext.current),
     viewModel: GameViewModel = getViewModel()
 ) {
+
     val sheetState = rememberModalBottomSheetState(
         initialValue = if (viewModel.endRoundDialog.value) ModalBottomSheetValue.Expanded else ModalBottomSheetValue.Hidden,
         confirmStateChange = { it != ModalBottomSheetValue.HalfExpanded }
@@ -182,13 +185,16 @@ private fun BottomSheetEndRound(viewModel: GameViewModel, onClose: () -> Unit) {
 
 @Composable
 private fun Board(viewModel: GameViewModel) {
+    val audio =  MediaPlayer.create(LocalContext.current, R.raw.sound_correct)
+
     LazyVerticalGrid(
         modifier = Modifier.padding(horizontal = 42.dp, vertical = 20.dp),
         columns = GridCells.Fixed(viewModel.boardSize.value ?: 3),
         content = {
             itemsIndexed(viewModel.gamePosition) { index, position ->
                 GameCell(position) {
-                    viewModel.onPositionClick(index)
+                    val isEndRound = viewModel.onPositionClick(index)
+                    if(isEndRound) audio.playAudio()
                 }
             }
         }
@@ -235,16 +241,12 @@ private fun BottomBar(viewModel: GameViewModel) {
 
                 Spacer(Modifier.width(8.dp))
 
-                Card() {
-
-                }
                 Box(
                     Modifier
                         .weight(1f)
                         .fillMaxHeight()
                         .background(dark, RoundedCornerShape(topStartPercent = 50))
                 ) {
-
                     PLayerName(
                         modifier = Modifier.align(Alignment.CenterStart),
                         icon = R.drawable.img_o,
@@ -272,15 +274,12 @@ private fun BottomBar(viewModel: GameViewModel) {
 private fun BottomBarAvatar(avatar: Int, isPlayerTurn: Boolean) {
     Column(horizontalAlignment = CenterHorizontally) {
 
-        Box {
-
-            Icon(
-                modifier = Modifier.align(TopCenter),
-                painter = painterResource(R.drawable.ic_arrow_drop),
-                contentDescription = null,
-                tint = if (isPlayerTurn) Color.White else Color.Transparent
-            )
-        }
+        Icon(
+            modifier = Modifier.align(CenterHorizontally),
+            painter = painterResource(R.drawable.ic_arrow_drop),
+            contentDescription = null,
+            tint = if (isPlayerTurn) Color.White else Color.Transparent
+        )
 
         Icon(
             modifier = Modifier
@@ -338,7 +337,7 @@ private fun GameCell(position: CellModel, onClick: () -> Unit) {
             Canvas(Modifier.fillMaxSize()) {
                 drawLine(
                     start = it.getStartOffset(size.width, position.paddingStart),
-                    end = it.getEndOffset(size.width,  position.paddingEnd),
+                    end = it.getEndOffset(size.width, position.paddingEnd),
                     color = Color.White,
                     strokeWidth = 10f,
                     alpha = .8f

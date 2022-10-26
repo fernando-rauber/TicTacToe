@@ -40,14 +40,14 @@ class GameViewModel(private val prefsStore: GamePrefsStore, private val useCase:
         }
     }
 
-    fun onPositionClick(position: Int) {
+    fun onPositionClick(position: Int) : Boolean{
         if (endRoundDialog.value) {
             launchDefault {
                 endRoundDialog.value = false
                 delay(100)
                 endRoundDialog.value = true
             }
-            return
+            return false
         }
 
         if (_gamePosition[position].image == null) {
@@ -65,8 +65,10 @@ class GameViewModel(private val prefsStore: GamePrefsStore, private val useCase:
                 }
 
                 updateWinnerCells(it)
+                return true
             }
         }
+        return false
     }
 
     private fun updateWinnerCells(counter: Counter) {
