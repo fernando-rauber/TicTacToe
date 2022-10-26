@@ -1,35 +1,45 @@
 package uk.fernando.tictactoe.usecase
 
+import uk.fernando.logger.AndroidLogger
+import uk.fernando.logger.MyLogger
 import uk.fernando.tictactoe.enum.WinnerDirection
 import uk.fernando.tictactoe.model.CellModel
 import uk.fernando.tictactoe.model.Counter
+import uk.fernando.util.ext.TAG
 import kotlin.math.sqrt
 
-class GameUseCase {
+class GameUseCase(private val logger: MyLogger) {
 
 
     fun validateBoard(list: List<CellModel>, winCondition: Int): Counter? {
-        val boardSize = sqrt(list.size.toDouble()).toInt()
+        kotlin.runCatching {
+            val boardSize = sqrt(list.size.toDouble()).toInt()
 
-        var counter = Counter(WinnerDirection.HORIZONTAL)
-        list.forEachIndexed { index, cell ->
+            var counter = Counter(WinnerDirection.HORIZONTAL)
+            list.forEachIndexed { index, cell ->
 
-            cell.image?.let {
+                cell.image?.let {
 
-                counter = validateCell(cell.image, counter, index)
+                    counter = validateCell(cell.image, counter, index)
 
-                if (counter.counter == winCondition) // Winner
-                    return counter
+                    if (counter.counter == winCondition) // Winner
+                        return counter
+                }
+
+                // reset counter - Horizontal
+                if (cell.image == null || (index + 1) % boardSize == 0) {
+                    counter.value = 0
+                    counter.counter = 0
+                }
             }
 
-            // reset counter - Horizontal
-            if (cell.image == null || (index + 1) % boardSize == 0) {
-                counter.value = 0
-                counter.counter = 0
-            }
+            return validateBoardVertical(list, winCondition)
+        }.onFailure {
+            logger.e(TAG, it.message.toString())
+            logger.addMessageToCrashlytics(TAG, "Error on validating board: msg: ${it.message}")
+            logger.addExceptionToCrashlytics(it)
         }
-
-        return validateBoardVertical(list, winCondition)
+        return null
     }
 
     private fun validateBoardVertical(list: List<CellModel>, winCondition: Int): Counter? {

@@ -1,7 +1,7 @@
 plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
-//    id 'com.google.firebase.crashlytics'
+    id 'com.google.firebase.crashlytics'
     id 'kotlin-kapt'
 }
 
@@ -25,10 +25,10 @@ android {
     buildTypes {
         debug {
             manifestPlaceholders["enableCrashReporting"] = false
-//            firebaseCrashlytics {
-//                // speed up build
-//                mappingFileUploadEnabled false
-//            }
+            firebaseCrashlytics {
+                // speed up build
+                mappingFileUploadEnabled false
+            }
         }
         release {
             minifyEnabled false
@@ -59,12 +59,11 @@ android {
 dependencies {
 
 //    implementation 'com.github.fernando-rauber.mylibrary:advertising:1.4.5'
-//    implementation 'com.github.fernando-rauber.mylibrary:logger:1.4.4'
-//    implementation 'com.github.fernando-rauber.mylibrary:billing:1.4.3'
+    implementation 'com.github.fernando-rauber.mylibrary:logger:1.4.4'
     implementation 'com.github.fernando-rauber.mylibrary:util:1.4.4'
 
     // Firebase
-//    implementation 'com.google.firebase:firebase-crashlytics-ktx:18.2.13'
+    implementation 'com.google.firebase:firebase-crashlytics-ktx:18.3.1'
 
     implementation 'androidx.core:core-ktx:1.9.0'
     implementation 'com.google.android.material:material:1.7.0'
@@ -96,5 +95,5 @@ dependencies {
     testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.4"
 }
 
-//apply plugin: 'com.google.gms.google-services'
-//apply plugin: 'com.google.firebase.crashlytics'
+apply plugin: 'com.google.gms.google-services'
+apply plugin: 'com.google.firebase.crashlytics'
