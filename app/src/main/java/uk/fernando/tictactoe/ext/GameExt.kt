@@ -24,6 +24,24 @@ fun WinnerDirection.getEndOffset(width: Float, padding: Boolean): Offset {
     }
 }
 
+fun getRandomAvatar(value: Int = 0) =
+    listOf(
+        R.drawable.ic_cat,
+        R.drawable.ic_chick,
+        R.drawable.ic_crab,
+        R.drawable.ic_dolphin,
+        R.drawable.ic_elephant,
+        R.drawable.ic_goat,
+        R.drawable.ic_mouse,
+        R.drawable.ic_octopus,
+        R.drawable.ic_panda,
+        R.drawable.ic_penguin,
+        R.drawable.ic_pig,
+        R.drawable.ic_rabbit,
+        R.drawable.ic_sheep,
+        R.drawable.ic_tiger
+    ).filter { it != value }.shuffled().first()
+
 fun Int.isPlayerX(): Boolean {
     return when (this) {
         R.drawable.img_x -> true

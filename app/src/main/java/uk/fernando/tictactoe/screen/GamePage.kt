@@ -3,16 +3,13 @@ package uk.fernando.tictactoe.screen
 import android.media.MediaPlayer
 import androidx.annotation.DrawableRes
 import androidx.compose.animation.core.*
-import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.CutCornerShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
@@ -38,7 +35,6 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import org.koin.androidx.compose.getViewModel
 import uk.fernando.tictactoe.R
-import uk.fernando.tictactoe.component.MyDivider
 import uk.fernando.tictactoe.component.NavigationTopBar
 import uk.fernando.tictactoe.component.WinConditionIcon
 import uk.fernando.tictactoe.ext.getEndOffset
@@ -47,7 +43,6 @@ import uk.fernando.tictactoe.model.CellModel
 import uk.fernando.tictactoe.theme.dark
 import uk.fernando.tictactoe.theme.greenLight
 import uk.fernando.tictactoe.viewmodel.GameViewModel
-import uk.fernando.util.component.MyAnimatedVisibility
 import uk.fernando.util.component.MyButton
 import uk.fernando.util.ext.clickableSingle
 import uk.fernando.util.ext.playAudio
@@ -57,11 +52,13 @@ import kotlin.math.ceil
 @Composable
 fun GamePage(
     navController: NavController = NavController(LocalContext.current),
+    boardSize: Int,
+    winCondition: Int,
     viewModel: GameViewModel = getViewModel()
 ) {
 
     val sheetState = rememberModalBottomSheetState(
-        initialValue = if (viewModel.endRoundDialog.value) ModalBottomSheetValue.Expanded else ModalBottomSheetValue.Hidden,
+        initialValue = if (viewModel.playerWinner.value != null) ModalBottomSheetValue.Expanded else ModalBottomSheetValue.Hidden,
         confirmStateChange = { it != ModalBottomSheetValue.HalfExpanded }
     )
 
@@ -102,22 +99,20 @@ fun GamePage(
                 contentAlignment = Center
             ) {
 
-                MyAnimatedVisibility(viewModel.boardSize.value != null) {
-                    Column(
-                        horizontalAlignment = CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        WinConditionIcon(viewModel.winCondition.value)
+                Column(
+                    horizontalAlignment = CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    WinConditionIcon(winCondition)
 
-                        Board(viewModel)
+                    Board(viewModel, boardSize)
 
-                        Text(
-                            text = stringResource(R.string.current_round, viewModel.currentRound.value, viewModel.rounds.value),
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onBackground,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                    }
+                    Text(
+                        text = stringResource(R.string.current_round, viewModel.currentRound.value, viewModel.rounds.value),
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onBackground,
+                        fontWeight = FontWeight.SemiBold
+                    )
                 }
             }
 
@@ -128,75 +123,81 @@ fun GamePage(
 
 @Composable
 private fun BottomSheetEndRound(viewModel: GameViewModel, onClose: () -> Unit) {
-    val isEndGame = viewModel.playerWinner.value.score >= ceil(viewModel.rounds.value / 2f)
-
     Surface(
-        shape = RoundedCornerShape(topStartPercent = 15, topEndPercent = 15),
-        contentColor = dark
+        shape = CutCornerShape( topEndPercent = 25),
+        contentColor = dark,
+        border = BorderStroke(2.dp, Color.White.copy(.4f)),
     ) {
         Column(Modifier.padding(16.dp)) {
 
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            viewModel.playerWinner.value?.let { playerWinner ->
 
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth(.3f)
-                        .padding(top = 15.dp)
-                ) {
-                    Icon(
+                val isEndGame = playerWinner.score >= ceil(viewModel.rounds.value / 2f)
+
+                Row(verticalAlignment = Alignment.CenterVertically) {
+
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth(.3f)
+                            .padding(top = 15.dp)
+                    ) {
+                        Icon(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .aspectRatio(1f),
+                            painter = painterResource(playerWinner.avatar),
+                            contentDescription = null,
+                            tint = Color.Unspecified
+                        )
+                        Icon(
+                            modifier = Modifier
+                                .fillMaxWidth(.45f)
+                                .aspectRatio(1f)
+                                .align(TopCenter)
+                                .offset(y = (-25).dp),
+                            painter = painterResource(R.drawable.ic_crown),
+                            contentDescription = null,
+                            tint = Color.Unspecified
+                        )
+                    }
+
+                    Text(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .aspectRatio(1f),
-                        painter = painterResource(viewModel.playerWinner.value.avatar),
-                        contentDescription = null,
-                        tint = Color.Unspecified
-                    )
-                    Icon(
-                        modifier = Modifier
-                            .fillMaxWidth(.5f)
-                            .aspectRatio(1f)
-                            .align(TopCenter)
-                            .offset(y = (-20).dp),
-                        painter = painterResource(R.drawable.ic_crown),
-                        contentDescription = null,
-                        tint = Color.Unspecified
+                            .padding(horizontal = 30.dp),
+                        text = stringResource(if (isEndGame) R.string.player_win else R.string.player_win_round, playerWinner.name),
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onBackground,
+                        fontWeight = FontWeight.SemiBold,
+                        textAlign = TextAlign.Center
                     )
                 }
 
-                Text(
-                    modifier = Modifier.fillMaxWidth(),
-                    text = stringResource(if (isEndGame) R.string.player_win else R.string.player_win_round, viewModel.playerWinner.value.name),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onBackground,
-                    fontWeight = FontWeight.SemiBold,
-                    textAlign = TextAlign.Center
+                //MyDivider(Modifier.padding(vertical = 16.dp))
+
+                MyButton(
+                    modifier = Modifier
+                        .align(End)
+                        .defaultMinSize(minHeight = 50.dp),
+                    text = stringResource(if (isEndGame) R.string.close_action else R.string.next_round_action).uppercase(),
+                    color = greenLight,
+                    onClick = if (isEndGame) onClose else viewModel::startNextRound
                 )
             }
-
-            MyDivider(Modifier.padding(vertical = 16.dp))
-
-            MyButton(
-                modifier = Modifier
-                    .align(End)
-                    .defaultMinSize(minHeight = 50.dp),
-                text = stringResource(if (isEndGame) R.string.close_action else R.string.next_round_action).uppercase(),
-                color = greenLight,
-                onClick = if (isEndGame) onClose else viewModel::startNextRound
-            )
         }
     }
 }
 
 @Composable
-private fun Board(viewModel: GameViewModel) {
+private fun Board(viewModel: GameViewModel, boardSize: Int) {
     val audio = MediaPlayer.create(LocalContext.current, R.raw.sound_finish)
 
     LazyVerticalGrid(
         modifier = Modifier.padding(horizontal = 42.dp, vertical = 20.dp),
-        columns = GridCells.Fixed(viewModel.boardSize.value ?: 3),
+        columns = GridCells.Fixed(boardSize),
         content = {
             itemsIndexed(viewModel.gamePosition) { index, position ->
-                GameCell(position) {
+                GameCell(position, boardSize) {
                     val isEndRound = viewModel.onPositionClick(index)
                     if (isEndRound) audio.playAudio()
                 }
@@ -233,8 +234,10 @@ private fun BottomBar(viewModel: GameViewModel) {
                     Modifier
                         .weight(1f)
                         .fillMaxHeight()
-                        .shadow(6.dp, CutCornerShape(topEndPercent = 40))
-                        .background(dark, CutCornerShape(topEndPercent = 40))
+                        .offset(-(4).dp, (4).dp)
+                        .border(2.dp, Color.White.copy(.4f), CutCornerShape(topEndPercent = 35))
+                        .shadow(6.dp, CutCornerShape(topEndPercent = 35))
+                        .background(dark, CutCornerShape(topEndPercent = 35))
                 ) {
                     PLayerName(
                         modifier = Modifier.align(Alignment.CenterEnd),
@@ -249,8 +252,10 @@ private fun BottomBar(viewModel: GameViewModel) {
                     Modifier
                         .weight(1f)
                         .fillMaxHeight()
-                        .shadow(6.dp, CutCornerShape(topStartPercent = 40))
-                        .background(dark, CutCornerShape(topStartPercent = 40))
+                        .offset((4).dp, (4).dp)
+                        .border(2.dp, Color.White.copy(.4f), CutCornerShape(topStartPercent = 35))
+                        .shadow(6.dp, CutCornerShape(topStartPercent = 35))
+                        .background(dark, CutCornerShape(topStartPercent = 35))
                 ) {
                     PLayerName(
                         modifier = Modifier.align(Alignment.CenterStart),
@@ -334,7 +339,7 @@ private fun PLayerName(modifier: Modifier, @DrawableRes icon: Int, name: String)
 }
 
 @Composable
-private fun GameCell(position: CellModel, onClick: () -> Unit) {
+private fun GameCell(position: CellModel, boardSize: Int, onClick: () -> Unit) {
     Box(
         Modifier
             .fillMaxSize()
@@ -359,7 +364,7 @@ private fun GameCell(position: CellModel, onClick: () -> Unit) {
                     start = it.getStartOffset(size.width, position.paddingStart),
                     end = it.getEndOffset(size.width, position.paddingEnd),
                     color = Color.White,
-                    strokeWidth = 10f,
+                    strokeWidth = 20f - boardSize,
                     alpha = .8f
                 )
             }

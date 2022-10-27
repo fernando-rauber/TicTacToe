@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import kotlinx.coroutines.delay
 import uk.fernando.tictactoe.R
 import uk.fernando.tictactoe.datastore.GamePrefsStore
+import uk.fernando.tictactoe.ext.getRandomAvatar
 import uk.fernando.tictactoe.ext.isPlayerX
 import uk.fernando.tictactoe.model.CellModel
 import uk.fernando.tictactoe.model.Counter
@@ -13,16 +14,13 @@ import uk.fernando.tictactoe.usecase.GameUseCase
 
 class GameViewModel(private val prefsStore: GamePrefsStore, private val useCase: GameUseCase) : BaseViewModel() {
 
-    val boardSize = mutableStateOf<Int?>(null)
-    val winCondition = mutableStateOf(3)
+    private var winCondition = 3
     val rounds = mutableStateOf(3)
     val currentRound = mutableStateOf(1)
 
-    val player1 = mutableStateOf(Player(R.drawable.ic_unicorn, "You"))
-    val player2 = mutableStateOf(Player(R.drawable.ic_chick, "Deon"))
-    val playerWinner = mutableStateOf(Player(R.drawable.ic_unicorn, "You"))
-
-    val endRoundDialog = mutableStateOf(false)
+    val player1 = mutableStateOf(Player(getRandomAvatar(), "You"))
+    val player2 = mutableStateOf(Player(getRandomAvatar(player1.value.avatar), ""))
+    val playerWinner = mutableStateOf<Player?>(null)
 
     val isPLayer1Turn = mutableStateOf(true)
 
@@ -31,12 +29,10 @@ class GameViewModel(private val prefsStore: GamePrefsStore, private val useCase:
 
     init {
         launchDefault {
-            boardSize.value = prefsStore.getBoardSize()
-            winCondition.value = prefsStore.getWinCondition()
+            winCondition = prefsStore.getWinCondition()
             rounds.value = prefsStore.getRounds()
-            val gameType = prefsStore.getGameType()
 
-            if (gameType == 1) { // Single player
+            if (prefsStore.getGameType() == 1) { // Single player
                 //difficulty.value = prefsStore.getDifficulty()
                 player2.value = player2.value.copy(name = "AI")
             } else { // Multiplayer
@@ -44,16 +40,16 @@ class GameViewModel(private val prefsStore: GamePrefsStore, private val useCase:
                 player2.value = player2.value.copy(name = player2Name)
             }
 
-            createCards(boardSize.value!!)
+            createCards(prefsStore.getBoardSize())
         }
     }
 
     fun onPositionClick(position: Int): Boolean {
-        if (endRoundDialog.value) {
+        playerWinner.value?.let {
             launchDefault {
-                endRoundDialog.value = false
+                playerWinner.value = null
                 delay(100)
-                endRoundDialog.value = true
+                playerWinner.value = it
             }
             return false
         }
@@ -63,7 +59,7 @@ class GameViewModel(private val prefsStore: GamePrefsStore, private val useCase:
 
             isPLayer1Turn.value = !isPLayer1Turn.value // Next Player
 
-            useCase.validateBoard(_gamePosition, winCondition.value)?.let {
+            useCase.validateBoard(_gamePosition, winCondition)?.let {
                 playerWinner.value = if (it.value!!.isPlayerX()) {
                     player1.value.score++
                     player1.value
@@ -84,11 +80,11 @@ class GameViewModel(private val prefsStore: GamePrefsStore, private val useCase:
             _gamePosition[position] = _gamePosition[position].copy(
                 direction = counter.direction,
                 paddingStart = index == 0,
-                paddingEnd = index == (winCondition.value - 1)
+                paddingEnd = index == (winCondition - 1)
             )
         }
-        // Display Bottom sheet 'Next Round'
-        endRoundDialog.value = true
+//        // Display Bottom sheet 'Next Round'
+//        endRoundDialog.value = true
     }
 
     fun startNextRound() {
@@ -97,7 +93,7 @@ class GameViewModel(private val prefsStore: GamePrefsStore, private val useCase:
         }
 
         currentRound.value++
-        endRoundDialog.value = false
+        playerWinner.value = null
     }
 
     private fun createCards(boardSize: Int) {

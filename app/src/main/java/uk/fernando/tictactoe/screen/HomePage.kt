@@ -1,13 +1,10 @@
 package uk.fernando.tictactoe.screen
 
 import androidx.annotation.StringRes
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -19,7 +16,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import org.koin.androidx.compose.getViewModel
 import uk.fernando.tictactoe.R
@@ -91,9 +87,8 @@ fun HomePage(
                 .padding(16.dp)
                 .defaultMinSize(minHeight = 50.dp),
             text = stringResource(R.string.start_action).uppercase(),
-            fontSize = 20.sp,
             color = greenLight,
-            onClick = { navController.safeNav(Directions.game.path) }
+            onClick = { navController.safeNav(Directions.game.withArgs("${viewModel.boardSize.value}", "${viewModel.winCondition.value}")) }
         )
     }
 }
