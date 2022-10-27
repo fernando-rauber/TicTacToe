@@ -25,7 +25,7 @@ fun WinConditionIcon(winCondition: Int) {
                 for (i in 1..winCondition) {
                     Image(
                         modifier = Modifier.padding(start = 1.dp),
-                        painter = painterResource(R.drawable.img_o),
+                        painter = painterResource(R.drawable.img_x),
                         contentDescription = null
                     )
                 }

@@ -11,6 +11,7 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetLayout
@@ -232,8 +233,8 @@ private fun BottomBar(viewModel: GameViewModel) {
                     Modifier
                         .weight(1f)
                         .fillMaxHeight()
-                        .shadow(4.dp, RoundedCornerShape(topEndPercent = 50))
-                        .background(dark, RoundedCornerShape(topEndPercent = 50))
+                        .shadow(6.dp, CutCornerShape(topEndPercent = 40))
+                        .background(dark, CutCornerShape(topEndPercent = 40))
                 ) {
                     PLayerName(
                         modifier = Modifier.align(Alignment.CenterEnd),
@@ -248,7 +249,8 @@ private fun BottomBar(viewModel: GameViewModel) {
                     Modifier
                         .weight(1f)
                         .fillMaxHeight()
-                        .background(dark, RoundedCornerShape(topStartPercent = 50))
+                        .shadow(6.dp, CutCornerShape(topStartPercent = 40))
+                        .background(dark, CutCornerShape(topStartPercent = 40))
                 ) {
                     PLayerName(
                         modifier = Modifier.align(Alignment.CenterStart),
@@ -298,7 +300,7 @@ private fun BottomBarAvatar(avatar: Int, isPlayerTurn: Boolean) {
 
         Icon(
             modifier = Modifier
-                .fillMaxHeight(1f)
+                .fillMaxHeight()
                 .aspectRatio(1f),
             painter = painterResource(avatar),
             contentDescription = null,

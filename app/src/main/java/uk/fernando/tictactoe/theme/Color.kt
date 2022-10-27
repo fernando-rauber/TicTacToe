@@ -6,7 +6,7 @@ val greenLight = Color(0xFF5eb14f)
 val green = Color(0xFF169D77)
 val greenDark = Color(0xFF107055)
 
-val dark = Color(0xFF3F3D5D)
+val dark = Color(0xFF383653)
 val darkLight = Color(0xFF192F4D)
 
 val gold = Color(0xFFD6B610)
