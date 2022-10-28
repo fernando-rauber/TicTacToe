@@ -13,8 +13,9 @@ import uk.fernando.tictactoe.datastore.GamePrefsStoreImpl
 import uk.fernando.tictactoe.datastore.PrefsStore
 import uk.fernando.tictactoe.datastore.PrefsStoreImpl
 import uk.fernando.tictactoe.usecase.GameUseCase
-import uk.fernando.tictactoe.viewmodel.GameViewModel
+import uk.fernando.tictactoe.viewmodel.EatGameViewModel
 import uk.fernando.tictactoe.viewmodel.HomeViewModel
+import uk.fernando.tictactoe.viewmodel.TicGameViewModel
 
 object KoinModule {
 
@@ -26,7 +27,7 @@ object KoinModule {
 
     private val coreModule = module {
 
-        single<MyLogger> { getAndroidLogger() }
+        single { getAndroidLogger() }
         single<PrefsStore> { PrefsStoreImpl(androidApplication()) }
         single<GamePrefsStore> { GamePrefsStoreImpl(androidApplication()) }
     }
@@ -42,7 +43,8 @@ object KoinModule {
     private val viewModelModule: Module
         get() = module {
             viewModel { HomeViewModel(get()) }
-            viewModel { GameViewModel(get(), get()) }
+            viewModel { TicGameViewModel(get(), get()) }
+            viewModel { EatGameViewModel(get(), get()) }
         }
 
     fun getAndroidLogger(): MyLogger {

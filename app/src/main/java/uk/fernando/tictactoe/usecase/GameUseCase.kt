@@ -1,6 +1,5 @@
 package uk.fernando.tictactoe.usecase
 
-import uk.fernando.logger.AndroidLogger
 import uk.fernando.logger.MyLogger
 import uk.fernando.tictactoe.enum.WinnerDirection
 import uk.fernando.tictactoe.model.CellModel
@@ -10,6 +9,22 @@ import kotlin.math.sqrt
 
 class GameUseCase(private val logger: MyLogger) {
 
+    fun createCards(boardSize: Int) : List<CellModel> {
+        val boardSizeTotal = boardSize * boardSize
+
+        val list = mutableListOf<CellModel>()
+
+        for (position in 0 until boardSizeTotal) {
+            list.add(
+                CellModel(
+                    showBarLeft = position % boardSize < boardSize - 1,
+                    showBarBottom = position < (boardSizeTotal - boardSize)
+                )
+            )
+        }
+
+       return list
+    }
 
     fun validateBoard(list: List<CellModel>, winCondition: Int): Counter? {
         kotlin.runCatching {
@@ -18,17 +33,17 @@ class GameUseCase(private val logger: MyLogger) {
             var counter = Counter(WinnerDirection.HORIZONTAL)
             list.forEachIndexed { index, cell ->
 
-                cell.image?.let {
+                cell.isX?.let {
 
-                    counter = validateCell(cell.image, counter, index)
+                    counter = validateCell(cell.isX, counter, index)
 
                     if (counter.counter == winCondition) // Winner
                         return counter
                 }
 
                 // reset counter - Horizontal
-                if (cell.image == null || (index + 1) % boardSize == 0) {
-                    counter.value = 0
+                if (cell.isX == null || (index + 1) % boardSize == 0) {
+                    counter.isX = null
                     counter.counter = 0
                 }
             }
@@ -49,13 +64,13 @@ class GameUseCase(private val logger: MyLogger) {
 
         list.forEachIndexed { index, cell ->
 
-            if (cell.image == null)
+            if (cell.isX == null)
                 map[(index + 1) % boardSize] = Counter(WinnerDirection.VERTICAL)
             else {
                 var counter = map[(index + 1) % boardSize]
 
-                if (counter == null || counter.value != cell.image)
-                    counter = Counter(WinnerDirection.VERTICAL).apply { firstValue(cell.image, index) }
+                if (counter == null || counter.isX != cell.isX)
+                    counter = Counter(WinnerDirection.VERTICAL).apply { firstValue(cell.isX, index) }
                 else
                     counter.increaseCounter(index)
 
@@ -80,7 +95,7 @@ class GameUseCase(private val logger: MyLogger) {
         list.forEachIndexed { index, cell ->
 
             if (index <= max) {
-                map[index] = Counter(WinnerDirection.START_TOP_END_BOTTOM).apply { firstValue(cell.image, index) }
+                map[index] = Counter(WinnerDirection.START_TOP_END_BOTTOM).apply { firstValue(cell.isX, index) }
             } else if (row > 1) {
                 kotlin.runCatching {
                     val indexCounter = index - (((row - 1) * boardSize) + row - 1)
@@ -88,7 +103,7 @@ class GameUseCase(private val logger: MyLogger) {
                     val counter = map[indexCounter]
 
                     if (counter != null) {
-                        map[indexCounter] = validateCell(cell.image, counter, index)
+                        map[indexCounter] = validateCell(cell.isX, counter, index)
 
                         if (map[indexCounter]?.counter == winCondition)
                             return counter
@@ -114,7 +129,7 @@ class GameUseCase(private val logger: MyLogger) {
                 row += 1
 
             if (index in (winCondition - 1) until boardSize) {
-                map[index] = Counter(WinnerDirection.BOTTOM_START_TOP_END).apply { firstValue(cell.image, index) }
+                map[index] = Counter(WinnerDirection.BOTTOM_START_TOP_END).apply { firstValue(cell.isX, index) }
             } else if (row > 1) {
                 kotlin.runCatching {
 
@@ -123,7 +138,7 @@ class GameUseCase(private val logger: MyLogger) {
                     val counter = map[indexCounter]
 
                     if (counter != null) {
-                        map[indexCounter] = validateCell(cell.image, counter, index)
+                        map[indexCounter] = validateCell(cell.isX, counter, index)
 
                         if (map[indexCounter]?.counter == winCondition)
                             return counter
@@ -152,7 +167,7 @@ class GameUseCase(private val logger: MyLogger) {
                 if (index >= (boardSize * nextRow) - 1) {
 
                     if (index % boardSize == 0) {
-                        map[index] = Counter(WinnerDirection.START_TOP_END_BOTTOM).apply { firstValue(cell.image, index) }
+                        map[index] = Counter(WinnerDirection.START_TOP_END_BOTTOM).apply { firstValue(cell.isX, index) }
                     } else {
                         kotlin.runCatching {
 
@@ -160,7 +175,7 @@ class GameUseCase(private val logger: MyLogger) {
                             val diagonal = map[indexCounter]
 
                             if (diagonal != null) {
-                                map[indexCounter] = validateCell(cell.image, diagonal, index)
+                                map[indexCounter] = validateCell(cell.isX, diagonal, index)
 
                                 if (map[indexCounter]?.counter == winCondition)
                                     return diagonal
@@ -198,7 +213,7 @@ class GameUseCase(private val logger: MyLogger) {
                 if (index >= (boardSize * nextRow) - 1) {
 
                     if (index % boardSize == (boardSize - 1)) {
-                        map[index] = Counter(WinnerDirection.BOTTOM_START_TOP_END).apply { firstValue(cell.image, index) }
+                        map[index] = Counter(WinnerDirection.BOTTOM_START_TOP_END).apply { firstValue(cell.isX, index) }
                     } else {
                         kotlin.runCatching {
 
@@ -206,7 +221,7 @@ class GameUseCase(private val logger: MyLogger) {
                             val diagonal = map[indexCounter]
 
                             if (diagonal != null) {
-                                map[indexCounter] = validateCell(cell.image, diagonal, index)
+                                map[indexCounter] = validateCell(cell.isX, diagonal, index)
 
                                 if (map[indexCounter]?.counter == winCondition)
                                     return diagonal
@@ -220,7 +235,6 @@ class GameUseCase(private val logger: MyLogger) {
                     }
                 }
             }
-
             nextRow++
         }
 
@@ -228,11 +242,11 @@ class GameUseCase(private val logger: MyLogger) {
     }
 }
 
-private fun validateCell(cellValue: Int?, counter: Counter, index: Int): Counter {
-    if (cellValue == null)
+private fun validateCell(isX: Boolean?, counter: Counter, index: Int): Counter {
+    if (isX == null)
         counter.reset()
-    else if (counter.value != cellValue)
-        counter.firstValue(cellValue, index)
+    else if (counter.isX != isX)
+        counter.firstValue(isX, index)
     else
         counter.increaseCounter(index)
 

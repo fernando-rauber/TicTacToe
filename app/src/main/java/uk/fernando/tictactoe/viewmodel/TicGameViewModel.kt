@@ -3,28 +3,25 @@ package uk.fernando.tictactoe.viewmodel
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import kotlinx.coroutines.delay
-import uk.fernando.tictactoe.R
 import uk.fernando.tictactoe.datastore.GamePrefsStore
 import uk.fernando.tictactoe.ext.getRandomAvatar
-import uk.fernando.tictactoe.ext.isPlayerX
 import uk.fernando.tictactoe.model.CellModel
 import uk.fernando.tictactoe.model.Counter
 import uk.fernando.tictactoe.model.Player
 import uk.fernando.tictactoe.usecase.GameUseCase
 
-class GameViewModel(private val prefsStore: GamePrefsStore, private val useCase: GameUseCase) : BaseViewModel() {
+open class TicGameViewModel(private val prefsStore: GamePrefsStore, private val useCase: GameUseCase) : BaseViewModel() {
 
-    private var winCondition = 3
+    var winCondition = 3
+
     val rounds = mutableStateOf(3)
     val currentRound = mutableStateOf(1)
-
     val player1 = mutableStateOf(Player(getRandomAvatar(), "You"))
     val player2 = mutableStateOf(Player(getRandomAvatar(player1.value.avatar), ""))
     val playerWinner = mutableStateOf<Player?>(null)
-
     val isPLayer1Turn = mutableStateOf(true)
 
-    private val _gamePosition = mutableStateListOf<CellModel>()
+    protected val _gamePosition = mutableStateListOf<CellModel>()
     val gamePosition: List<CellModel> = _gamePosition
 
     init {
@@ -40,11 +37,11 @@ class GameViewModel(private val prefsStore: GamePrefsStore, private val useCase:
                 player2.value = player2.value.copy(name = player2Name)
             }
 
-            createCards(prefsStore.getBoardSize())
+            _gamePosition.addAll(useCase.createCards(prefsStore.getBoardSize()))
         }
     }
 
-    fun onPositionClick(position: Int): Boolean {
+    open fun onPositionClick(position: Int): Boolean {
         playerWinner.value?.let {
             launchDefault {
                 playerWinner.value = null
@@ -54,13 +51,18 @@ class GameViewModel(private val prefsStore: GamePrefsStore, private val useCase:
             return false
         }
 
-        if (_gamePosition[position].image == null) {
-            _gamePosition[position] = _gamePosition[position].copy(image = if (isPLayer1Turn.value) R.drawable.img_x else R.drawable.img_o)
+        return insertValueCellTicTacToe(position)
+    }
+
+    open fun insertValueCellTicTacToe(position: Int): Boolean {
+        val cell = _gamePosition[position]
+        if (cell.isX == null) {
+            _gamePosition[position] = cell.copy(isX = isPLayer1Turn.value)
 
             isPLayer1Turn.value = !isPLayer1Turn.value // Next Player
 
             useCase.validateBoard(_gamePosition, winCondition)?.let {
-                playerWinner.value = if (it.value!!.isPlayerX()) {
+                playerWinner.value = if (it.isX!!) {
                     player1.value.score++
                     player1.value
                 } else {
@@ -75,7 +77,8 @@ class GameViewModel(private val prefsStore: GamePrefsStore, private val useCase:
         return false
     }
 
-    private fun updateWinnerCells(counter: Counter) {
+
+    fun updateWinnerCells(counter: Counter) {
         counter.ids.forEachIndexed { index, position ->
             _gamePosition[position] = _gamePosition[position].copy(
                 direction = counter.direction,
@@ -83,33 +86,14 @@ class GameViewModel(private val prefsStore: GamePrefsStore, private val useCase:
                 paddingEnd = index == (winCondition - 1)
             )
         }
-//        // Display Bottom sheet 'Next Round'
-//        endRoundDialog.value = true
     }
 
     fun startNextRound() {
         (0 until _gamePosition.size).forEach { index ->
-            _gamePosition[index] = _gamePosition[index].copy(image = null, direction = null)
+            _gamePosition[index] = _gamePosition[index].copy(direction = null, isX = null, size = null)
         }
 
         currentRound.value++
         playerWinner.value = null
-    }
-
-    private fun createCards(boardSize: Int) {
-        val boardSizeTotal = boardSize * boardSize
-
-        val list = mutableListOf<CellModel>()
-
-        for (position in 0 until boardSizeTotal) {
-            list.add(
-                CellModel(
-                    showBarLeft = position % boardSize < boardSize - 1,
-                    showBarBottom = position < (boardSizeTotal - boardSize)
-                )
-            )
-        }
-
-        _gamePosition.addAll(list)
     }
 }

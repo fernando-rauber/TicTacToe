@@ -42,19 +42,19 @@ import uk.fernando.tictactoe.ext.getStartOffset
 import uk.fernando.tictactoe.model.CellModel
 import uk.fernando.tictactoe.theme.dark
 import uk.fernando.tictactoe.theme.greenLight
-import uk.fernando.tictactoe.viewmodel.GameViewModel
+import uk.fernando.tictactoe.viewmodel.TicGameViewModel
 import uk.fernando.util.component.MyButton
 import uk.fernando.util.ext.clickableSingle
 import uk.fernando.util.ext.playAudio
 import kotlin.math.ceil
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun GamePage(
+fun TicGamePage(
     navController: NavController = NavController(LocalContext.current),
     boardSize: Int,
     winCondition: Int,
-    viewModel: GameViewModel = getViewModel()
+    viewModel: TicGameViewModel = getViewModel()
 ) {
 
     val sheetState = rememberModalBottomSheetState(
@@ -75,31 +75,10 @@ fun GamePage(
     ) {
         Column(Modifier.fillMaxSize()) {
 
-            NavigationTopBar(rightIcon = {
-                Card(
-                    modifier = Modifier
-                        .align(Alignment.CenterEnd)
-                        .padding(end = 8.dp),
-                    onClick = { navController.popBackStack() },
-                    shape = CircleShape,
-                    elevation = CardDefaults.cardElevation(4.dp),
-                    colors = CardDefaults.cardColors(Color.White),
-                ) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_close),
-                        modifier = Modifier.padding(8.dp),
-                        contentDescription = null,
-                        tint = Color.Black.copy(.7f)
-                    )
-                }
-            })
-
-            Box(
-                modifier = Modifier.weight(1f),
-                contentAlignment = Center
-            ) {
+            GameTopBar(onClose = { navController.popBackStack() })
 
                 Column(
+                    Modifier.weight(1f),
                     horizontalAlignment = CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                 ) {
@@ -114,17 +93,39 @@ fun GamePage(
                         fontWeight = FontWeight.SemiBold
                     )
                 }
-            }
 
             BottomBar(viewModel)
         }
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun BottomSheetEndRound(viewModel: GameViewModel, onClose: () -> Unit) {
+fun GameTopBar(onClose: () -> Unit) {
+    NavigationTopBar(rightIcon = {
+        Card(
+            modifier = Modifier
+                .align(Alignment.CenterEnd)
+                .padding(end = 8.dp),
+            onClick = onClose,
+            shape = CircleShape,
+            elevation = CardDefaults.cardElevation(4.dp),
+            colors = CardDefaults.cardColors(Color.White),
+        ) {
+            Icon(
+                painter = painterResource(R.drawable.ic_close),
+                modifier = Modifier.padding(8.dp),
+                contentDescription = null,
+                tint = Color.Black.copy(.7f)
+            )
+        }
+    })
+}
+
+@Composable
+fun BottomSheetEndRound(viewModel: TicGameViewModel, onClose: () -> Unit) {
     Surface(
-        shape = CutCornerShape( topEndPercent = 25),
+        shape = CutCornerShape(topEndPercent = 25),
         contentColor = dark,
         border = BorderStroke(2.dp, Color.White.copy(.4f)),
     ) {
@@ -173,8 +174,6 @@ private fun BottomSheetEndRound(viewModel: GameViewModel, onClose: () -> Unit) {
                     )
                 }
 
-                //MyDivider(Modifier.padding(vertical = 16.dp))
-
                 MyButton(
                     modifier = Modifier
                         .align(End)
@@ -189,7 +188,7 @@ private fun BottomSheetEndRound(viewModel: GameViewModel, onClose: () -> Unit) {
 }
 
 @Composable
-private fun Board(viewModel: GameViewModel, boardSize: Int) {
+fun Board(viewModel: TicGameViewModel, boardSize: Int) {
     val audio = MediaPlayer.create(LocalContext.current, R.raw.sound_finish)
 
     LazyVerticalGrid(
@@ -207,7 +206,7 @@ private fun Board(viewModel: GameViewModel, boardSize: Int) {
 }
 
 @Composable
-private fun BottomBar(viewModel: GameViewModel) {
+fun BottomBar(viewModel: TicGameViewModel) {
     Box(
         Modifier
             .fillMaxHeight(0.25f)
@@ -347,12 +346,19 @@ private fun GameCell(position: CellModel, boardSize: Int, onClick: () -> Unit) {
             .clickableSingle { onClick() }
     ) {
 
+        position.isX?.let { isX ->
+            val image = if (position.size == null) {
+                if (isX) R.drawable.img_x
+                else R.drawable.img_o
+            } else {
+                if (isX) R.drawable.eat_red
+                else R.drawable.eat_green
+            }
 
-        position.image?.let { image ->
             Image(
                 modifier = Modifier
                     .align(Center)
-                    .fillMaxSize(.6f),
+                    .fillMaxSize(if (position.size == null) .6f else (.2f * position.size) + .1f),
                 painter = painterResource(image),
                 contentDescription = null,
             )

@@ -4,12 +4,12 @@ import uk.fernando.tictactoe.enum.WinnerDirection
 
 data class Counter(
     val direction: WinnerDirection,
-    var value: Int? = null,
+    var isX: Boolean? = null,
     var counter: Int = 0,
     var ids: MutableList<Int> = mutableListOf()
 ) {
-    fun firstValue(newValue: Int?, index: Int) {
-        value = newValue
+    fun firstValue(newValue: Boolean?, index: Int) {
+        isX = newValue
         ids.clear()
 
         if (newValue != null) {
@@ -20,7 +20,7 @@ data class Counter(
     }
 
     fun reset() {
-        value = null
+        isX = null
         ids.clear()
         counter = 0
     }

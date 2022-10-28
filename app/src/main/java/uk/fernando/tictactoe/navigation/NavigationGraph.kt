@@ -6,9 +6,10 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import uk.fernando.tictactoe.navigation.Directions.BOARD_SIZE
 import uk.fernando.tictactoe.navigation.Directions.WIN_CONDITION
-import uk.fernando.tictactoe.screen.GamePage
+import uk.fernando.tictactoe.screen.EatGamePage
 import uk.fernando.tictactoe.screen.HomePage
 import uk.fernando.tictactoe.screen.SettingsPage
+import uk.fernando.tictactoe.screen.TicGamePage
 
 
 @ExperimentalAnimationApi
@@ -25,7 +26,7 @@ fun NavGraphBuilder.buildGraph(navController: NavController) {
         if (boardSize == null || winCondition == null)
             navController.popBackStack()
         else
-            GamePage(navController, boardSize.toInt(), winCondition.toInt())
+            TicGamePage(navController, boardSize.toInt(), winCondition.toInt())
     }
 
     composable(Directions.settings.path) {
