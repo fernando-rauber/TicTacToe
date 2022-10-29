@@ -190,6 +190,7 @@ fun BottomSheetEndRound(viewModel: TicGameViewModel, onClose: () -> Unit) {
 @Composable
 fun Board(viewModel: TicGameViewModel, boardSize: Int) {
     val audio = MediaPlayer.create(LocalContext.current, R.raw.sound_finish)
+    val audioWrong = MediaPlayer.create(LocalContext.current, R.raw.bip)
 
     LazyVerticalGrid(
         modifier = Modifier.padding(horizontal = 42.dp, vertical = 20.dp),
@@ -197,8 +198,12 @@ fun Board(viewModel: TicGameViewModel, boardSize: Int) {
         content = {
             itemsIndexed(viewModel.gamePosition) { index, position ->
                 GameCell(position, boardSize) {
-                    val isEndRound = viewModel.onPositionClick(index)
-                    if (isEndRound) audio.playAudio()
+                    viewModel.onPositionClick(index)?.let { isEndRound ->
+                        if (isEndRound)
+                            audio.playAudio()
+                        else
+                            audioWrong.playAudio()
+                    }
                 }
             }
         }

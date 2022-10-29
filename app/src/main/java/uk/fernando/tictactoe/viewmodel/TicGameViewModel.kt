@@ -41,20 +41,20 @@ open class TicGameViewModel(private val prefsStore: GamePrefsStore, private val 
         }
     }
 
-    open fun onPositionClick(position: Int): Boolean {
+    open fun onPositionClick(position: Int): Boolean? {
         playerWinner.value?.let {
             launchDefault {
                 playerWinner.value = null
                 delay(100)
                 playerWinner.value = it
             }
-            return false
+            return null
         }
 
         return insertValueCellTicTacToe(position)
     }
 
-    open fun insertValueCellTicTacToe(position: Int): Boolean {
+    open fun insertValueCellTicTacToe(position: Int): Boolean? {
         val cell = _gamePosition[position]
         if (cell.isX == null) {
             _gamePosition[position] = cell.copy(isX = isPLayer1Turn.value)
@@ -73,10 +73,10 @@ open class TicGameViewModel(private val prefsStore: GamePrefsStore, private val 
                 updateWinnerCells(it)
                 return true
             }
+            return null
         }
         return false
     }
-
 
     fun updateWinnerCells(counter: Counter) {
         counter.ids.forEachIndexed { index, position ->

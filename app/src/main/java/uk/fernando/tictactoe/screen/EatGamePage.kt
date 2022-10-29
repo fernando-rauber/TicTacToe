@@ -68,18 +68,18 @@ fun EatGamePage(
 
                 Board(viewModel, boardSize)
 
-                Text(
-                    text = stringResource(R.string.current_round, viewModel.currentRound.value, viewModel.rounds.value),
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onBackground,
-                    fontWeight = FontWeight.SemiBold
-                )
-
                 DollCount(
                     modifier = Modifier
                         .weight(1f)
                         .padding(top = 10.dp),
                     viewModel = viewModel
+                )
+
+                Text(
+                    text = stringResource(R.string.current_round, viewModel.currentRound.value, viewModel.rounds.value),
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    fontWeight = FontWeight.SemiBold
                 )
             }
 

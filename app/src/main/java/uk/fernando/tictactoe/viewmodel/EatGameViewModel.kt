@@ -19,7 +19,7 @@ class EatGameViewModel(private val prefsStore: GamePrefsStore, private val useCa
         }
     }
 
-    override fun insertValueCellTicTacToe(position: Int): Boolean {
+    override fun insertValueCellTicTacToe(position: Int): Boolean? {
         if (imageSize == null)
             return false
 
@@ -43,6 +43,7 @@ class EatGameViewModel(private val prefsStore: GamePrefsStore, private val useCa
                 updateWinnerCells(it)
                 return true
             }
+            return null
         }
         return false
     }
