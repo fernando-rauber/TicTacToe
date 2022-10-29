@@ -4,9 +4,14 @@
     <string name="tic">Tic</string>
     <string name="tac">Tac</string>
     <string name="toe">Toe</string>
-
+    <string name="eat">Eat</string>
 
     // Home
+    <string name="home_subtext">Choose your game</string>
+    <string name="classic_action">Classic</string>
+    <string name="eat_action">Eat Tac Toe</string>
+
+    // Create Game
     <string name="board_size">Board size</string>
     <string name="win_condition">Win condition</string>
     <string name="rounds">Rounds</string>

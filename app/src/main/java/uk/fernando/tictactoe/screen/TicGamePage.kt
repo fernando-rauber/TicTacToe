@@ -75,14 +75,17 @@ fun TicGamePage(
     ) {
         Column(Modifier.fillMaxSize()) {
 
-            GameTopBar(onClose = { navController.popBackStack() })
+            GameTopBar(
+                gameType = 1,
+                onClose = { navController.popBackStack() }
+            )
 
                 Column(
                     Modifier.weight(1f),
                     horizontalAlignment = CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                 ) {
-                    WinConditionIcon(winCondition)
+                    WinConditionIcon(winCondition, 1)
 
                     Board(viewModel, boardSize)
 
@@ -101,8 +104,10 @@ fun TicGamePage(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun GameTopBar(onClose: () -> Unit) {
-    NavigationTopBar(rightIcon = {
+fun GameTopBar(gameType: Int, onClose: () -> Unit) {
+    NavigationTopBar(
+        gameType = gameType,
+        rightIcon = {
         Card(
             modifier = Modifier
                 .align(Alignment.CenterEnd)

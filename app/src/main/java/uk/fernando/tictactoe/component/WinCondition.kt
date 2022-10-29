@@ -12,7 +12,7 @@ import androidx.compose.ui.unit.dp
 import uk.fernando.tictactoe.R
 
 @Composable
-fun WinConditionIcon(winCondition: Int) {
+fun WinConditionIcon(winCondition: Int, gameType: Int) {
     Box(
         modifier = Modifier.fillMaxWidth(),
         contentAlignment = Alignment.Center
@@ -25,7 +25,7 @@ fun WinConditionIcon(winCondition: Int) {
                 for (i in 1..winCondition) {
                     Image(
                         modifier = Modifier.padding(start = 1.dp),
-                        painter = painterResource(R.drawable.img_x),
+                        painter = painterResource(if (gameType == 1) R.drawable.img_x else R.drawable.eat_red),
                         contentDescription = null
                     )
                 }

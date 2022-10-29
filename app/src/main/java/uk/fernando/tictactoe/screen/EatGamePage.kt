@@ -55,7 +55,10 @@ fun EatGamePage(
     ) {
         Column(Modifier.fillMaxSize()) {
 
-            GameTopBar(onClose = { navController.popBackStack() })
+            GameTopBar(
+                gameType = 2,
+                onClose = { navController.popBackStack() }
+            )
 
             Column(
                 modifier = Modifier
@@ -64,7 +67,7 @@ fun EatGamePage(
                 horizontalAlignment = CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-                WinConditionIcon(winCondition)
+                WinConditionIcon(winCondition, 2)
 
                 Board(viewModel, boardSize)
 

@@ -24,6 +24,7 @@ import uk.fernando.util.component.MyIconButton
 @Composable
 fun NavigationTopBar(
     onBackClick: (() -> Unit)? = null,
+    gameType: Int,
     rightIcon: (@Composable BoxScope.() -> Unit)? = null
 ) {
     Box(
@@ -44,7 +45,7 @@ fun NavigationTopBar(
             modifier = Modifier.align(Alignment.Center),
             text = buildAnnotatedString {
                 withStyle(style = SpanStyle(greenLight)) {
-                    append(stringResource(R.string.tic))
+                    append(stringResource(if (gameType == 1) R.string.tic else R.string.eat))
                 }
                 append(" ")
                 withStyle(style = SpanStyle(gold)) {

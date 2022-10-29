@@ -37,13 +37,23 @@ object Directions {
             get() = emptyList()
     }
 
+    val createGame = object : NavigationCommand {
+        override val path: String
+            get() = "create_game"
+        override val arguments: List<NamedNavArgument>
+            get() = listOf(
+                navArgument(GAME_TYPE) { type = NavType.StringType }
+            )
+    }
+
     val game = object : NavigationCommand {
         override val path: String
             get() = "game"
         override val arguments: List<NamedNavArgument>
             get() = listOf(
                 navArgument(BOARD_SIZE) { type = NavType.StringType },
-                navArgument(WIN_CONDITION) { type = NavType.StringType }
+                navArgument(WIN_CONDITION) { type = NavType.StringType },
+                navArgument(GAME_TYPE) { type = NavType.StringType }
             )
     }
 
@@ -54,6 +64,7 @@ object Directions {
             get() = emptyList()
     }
 
+    const val GAME_TYPE = "game_type"
     const val BOARD_SIZE = "board_size"
     const val WIN_CONDITION = "win_condition"
 }
