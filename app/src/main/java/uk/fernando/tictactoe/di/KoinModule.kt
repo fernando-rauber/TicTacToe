@@ -44,7 +44,7 @@ object KoinModule {
         get() = module {
             viewModel { HomeViewModel(get()) }
             viewModel { TicGameViewModel(get(), get()) }
-            viewModel { EatGameViewModel(get(), get()) }
+            viewModel { EatGameViewModel(get(), get(), get()) }
         }
 
     fun getAndroidLogger(): MyLogger {

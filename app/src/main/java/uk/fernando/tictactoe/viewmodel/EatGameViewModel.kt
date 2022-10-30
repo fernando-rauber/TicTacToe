@@ -2,11 +2,16 @@ package uk.fernando.tictactoe.viewmodel
 
 import androidx.compose.runtime.mutableStateOf
 import uk.fernando.tictactoe.datastore.GamePrefsStore
+import uk.fernando.tictactoe.datastore.PrefsStore
 import uk.fernando.tictactoe.model.DollCounter
 import uk.fernando.tictactoe.usecase.GameUseCase
 import kotlin.math.ceil
 
-class EatGameViewModel(private val prefsStore: GamePrefsStore, private val useCase: GameUseCase) : TicGameViewModel(prefsStore, useCase) {
+class EatGameViewModel(
+    private val gamePrefs: GamePrefsStore,
+    private val prefsStore: PrefsStore,
+    private val useCase: GameUseCase
+) : TicGameViewModel(gamePrefs, useCase) {
 
     private var imageSize: Int? = null // Used for eat tac toe
 
@@ -15,7 +20,7 @@ class EatGameViewModel(private val prefsStore: GamePrefsStore, private val useCa
 
     init {
         launchDefault {
-            setDollQuantity(prefsStore.getBoardSize())
+            setDollQuantity(gamePrefs.getBoardSize())
         }
     }
 
@@ -50,6 +55,10 @@ class EatGameViewModel(private val prefsStore: GamePrefsStore, private val useCa
 
     fun setImageSize(size: Int) {
         imageSize = size
+    }
+
+    fun closeTutorial() {
+        launchDefault { prefsStore.storeTutorialStatus(false) }
     }
 
     private fun reduceDollQuantity() {

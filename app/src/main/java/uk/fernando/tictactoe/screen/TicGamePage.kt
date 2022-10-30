@@ -80,22 +80,22 @@ fun TicGamePage(
                 onClose = { navController.popBackStack() }
             )
 
-                Column(
-                    Modifier.weight(1f),
-                    horizontalAlignment = CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    WinConditionIcon(winCondition, 1)
+            Column(
+                Modifier.weight(1f),
+                horizontalAlignment = CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                WinConditionIcon(winCondition, 1)
 
-                    Board(viewModel, boardSize)
+                Board(viewModel, boardSize)
 
-                    Text(
-                        text = stringResource(R.string.current_round, viewModel.currentRound.value, viewModel.rounds.value),
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onBackground,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                }
+                Text(
+                    text = stringResource(R.string.current_round, viewModel.currentRound.value, viewModel.rounds.value),
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
 
             BottomBar(viewModel)
         }
@@ -108,23 +108,23 @@ fun GameTopBar(gameType: Int, onClose: () -> Unit) {
     NavigationTopBar(
         gameType = gameType,
         rightIcon = {
-        Card(
-            modifier = Modifier
-                .align(Alignment.CenterEnd)
-                .padding(end = 8.dp),
-            onClick = onClose,
-            shape = CircleShape,
-            elevation = CardDefaults.cardElevation(4.dp),
-            colors = CardDefaults.cardColors(Color.White),
-        ) {
-            Icon(
-                painter = painterResource(R.drawable.ic_close),
-                modifier = Modifier.padding(8.dp),
-                contentDescription = null,
-                tint = Color.Black.copy(.7f)
-            )
-        }
-    })
+            Card(
+                modifier = Modifier
+                    .align(Alignment.CenterEnd)
+                    .padding(end = 8.dp),
+                onClick = onClose,
+                shape = CircleShape,
+                elevation = CardDefaults.cardElevation(4.dp),
+                colors = CardDefaults.cardColors(Color.White),
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_close),
+                    modifier = Modifier.padding(8.dp),
+                    contentDescription = null,
+                    tint = Color.Black.copy(.7f)
+                )
+            }
+        })
 }
 
 @Composable
@@ -193,7 +193,7 @@ fun BottomSheetEndRound(viewModel: TicGameViewModel, onClose: () -> Unit) {
 }
 
 @Composable
-fun Board(viewModel: TicGameViewModel, boardSize: Int) {
+fun Board(viewModel: TicGameViewModel, boardSize: Int, onNotSelected: () -> Unit = {}) {
     val audio = MediaPlayer.create(LocalContext.current, R.raw.sound_finish)
     val audioWrong = MediaPlayer.create(LocalContext.current, R.raw.bip)
 
@@ -203,12 +203,14 @@ fun Board(viewModel: TicGameViewModel, boardSize: Int) {
         content = {
             itemsIndexed(viewModel.gamePosition) { index, position ->
                 GameCell(position, boardSize) {
-                    viewModel.onPositionClick(index)?.let { isEndRound ->
+                    val isEndRound = viewModel.onPositionClick(index)
+                    if (isEndRound != null) {
                         if (isEndRound)
                             audio.playAudio()
                         else
                             audioWrong.playAudio()
-                    }
+                    } else
+                        onNotSelected()
                 }
             }
         }

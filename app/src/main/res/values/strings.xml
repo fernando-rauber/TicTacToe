@@ -37,4 +37,10 @@
     <string name="close_action">Close</string>
     <string name="player_name">Player name</string>
 
+    // Tutorial
+    <string name="tutorial_title">How to play</string>
+    <string name="tutorial_1">Choose the doll size and place it.</string>
+    <string name="tutorial_2">The bigger doll eats the smaller doll.</string>
+    <string name="tutorial_3">Win matching the color and not the size</string>
+
 </resources>

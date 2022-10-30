@@ -18,7 +18,6 @@ fun SettingsPage(
     val context = LocalContext.current
     val prefs: PrefsStore by inject()
     val isSoundEnable = prefs.isSoundEnabled().collectAsState(initial = true)
-    val isPremium = prefs.isPremium().collectAsState(initial = false)
 
     Box {
         Column(Modifier.fillMaxSize()) {
