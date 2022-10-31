@@ -4,7 +4,7 @@ import androidx.compose.runtime.mutableStateOf
 import uk.fernando.tictactoe.datastore.GamePrefsStore
 import uk.fernando.tictactoe.datastore.PrefsStore
 import uk.fernando.tictactoe.enum.CellResult
-import uk.fernando.tictactoe.model.DollCounter
+import uk.fernando.tictactoe.model.SizeModel
 import uk.fernando.tictactoe.usecase.GameUseCase
 import kotlin.math.ceil
 
@@ -16,8 +16,8 @@ class EatGameViewModel(
 
     val imageSize = mutableStateOf<Int?>(null)
 
-    val playerRed = mutableStateOf(DollCounter())
-    val playerGreen = mutableStateOf(DollCounter())
+    val playerRed = mutableStateOf(SizeModel())
+    val playerGreen = mutableStateOf(SizeModel())
 
     init {
         launchDefault {
@@ -33,7 +33,7 @@ class EatGameViewModel(
         if (cell.isX == null || imageSize.value!! > cell.size!!) {
             _gamePosition[position] = cell.copy(isX = isPLayer1Turn.value, size = imageSize.value)
 
-            reduceDollQuantity()
+            reduceSizeQuantity()
 
             isPLayer1Turn.value = !isPLayer1Turn.value // Next Player
 
@@ -62,7 +62,7 @@ class EatGameViewModel(
         launchDefault { prefsStore.storeTutorialStatus(false) }
     }
 
-    private fun reduceDollQuantity() {
+    private fun reduceSizeQuantity() {
         if (imageSize.value != 1) {
             if (isPLayer1Turn.value) {
                 if (imageSize.value == 2)

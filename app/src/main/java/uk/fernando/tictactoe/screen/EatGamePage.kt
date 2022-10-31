@@ -29,7 +29,7 @@ import uk.fernando.tictactoe.R
 import uk.fernando.tictactoe.component.MyDivider
 import uk.fernando.tictactoe.component.WinConditionIcon
 import uk.fernando.tictactoe.datastore.PrefsStore
-import uk.fernando.tictactoe.model.DollCounter
+import uk.fernando.tictactoe.model.SizeModel
 import uk.fernando.tictactoe.theme.gold
 import uk.fernando.tictactoe.viewmodel.EatGameViewModel
 import uk.fernando.util.component.MyAnimatedVisibility
@@ -88,7 +88,7 @@ fun EatGamePage(
                         onSizeNoSelected = { setHighlight(true) }
                     )
 
-                    DollCount(
+                    ItemSizeCount(
                         modifier = Modifier
                             .weight(1f)
                             .padding(top = 10.dp),
@@ -119,12 +119,12 @@ fun EatGamePage(
 }
 
 @Composable
-private fun DollCount(modifier: Modifier, viewModel: EatGameViewModel, highlight: Boolean, onSelected: (Int) -> Unit) {
+private fun ItemSizeCount(modifier: Modifier, viewModel: EatGameViewModel, highlight: Boolean, onSelected: (Int) -> Unit) {
     val isPlayer1 = viewModel.isPLayer1Turn.value
 
     Row(modifier.fillMaxWidth()) {
         Column(Modifier.weight(1f)) {
-            DollColumn(
+            SizeColumn(
                 icon = R.drawable.eat_red,
                 sizeCounter = viewModel.playerRed.value,
                 sizeSelected = if (isPlayer1) viewModel.imageSize.value ?: 0 else 0,
@@ -137,7 +137,7 @@ private fun DollCount(modifier: Modifier, viewModel: EatGameViewModel, highlight
             modifier = Modifier.weight(1f),
             horizontalAlignment = Alignment.End
         ) {
-            DollColumn(
+            SizeColumn(
                 icon = R.drawable.eat_green,
                 sizeCounter = viewModel.playerGreen.value,
                 sizeSelected = if (!isPlayer1) viewModel.imageSize.value ?: 0 else 0,
@@ -150,7 +150,7 @@ private fun DollCount(modifier: Modifier, viewModel: EatGameViewModel, highlight
 }
 
 @Composable
-private fun DollColumn(@DrawableRes icon: Int, sizeCounter: DollCounter, sizeSelected: Int, highlight: Boolean, isLeftSide: Boolean = false, onSelected: (Int) -> Unit) {
+private fun SizeColumn(@DrawableRes icon: Int, sizeCounter: SizeModel, sizeSelected: Int, highlight: Boolean, isLeftSide: Boolean = false, onSelected: (Int) -> Unit) {
     val alpha: Float by animateFloatAsState(
         targetValue = if (highlight) 1f else 0f,
         animationSpec = infiniteRepeatable(
@@ -163,20 +163,20 @@ private fun DollColumn(@DrawableRes icon: Int, sizeCounter: DollCounter, sizeSel
         modifier = Modifier.border(2.dp, gold.copy(alpha)),
         horizontalAlignment = if (isLeftSide) Alignment.End else Alignment.Start
     ) {
-        Doll(icon, sizeSelected == 1, 1f, 99, isLeftSide) {
+        SizeOption(icon, sizeSelected == 1, 1f, sizeCounter.size1, isLeftSide) {
             onSelected(1)
         }
-        Doll(icon, sizeSelected == 2, 1.3f, sizeCounter.size2, isLeftSide) {
+        SizeOption(icon, sizeSelected == 2, 1.3f, sizeCounter.size2, isLeftSide) {
             onSelected(2)
         }
-        Doll(icon, sizeSelected == 3, 1.6f, sizeCounter.size3, isLeftSide) {
+        SizeOption(icon, sizeSelected == 3, 1.6f, sizeCounter.size3, isLeftSide) {
             onSelected(3)
         }
     }
 }
 
 @Composable
-private fun ColumnScope.Doll(@DrawableRes image: Int, isSelected: Boolean, weight: Float, quantity: Int, isEnd: Boolean = false, onClick: () -> Unit) {
+private fun ColumnScope.SizeOption(@DrawableRes image: Int, isSelected: Boolean, weight: Float, quantity: Int, isEnd: Boolean = false, onClick: () -> Unit) {
     Row(
         modifier = Modifier
             .weight(weight)
