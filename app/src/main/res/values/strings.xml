@@ -27,7 +27,6 @@
 
     <string name="start_action">Start</string>
 
-
     // Game
     <string name="score">%1$d "&#8195;" Score "&#8195;"  %2$d</string>
     <string name="current_round">Round %1$d - %2$d</string>
@@ -39,8 +38,8 @@
 
     // Tutorial
     <string name="tutorial_title">How to play</string>
-    <string name="tutorial_1">Choose the doll size and place it.</string>
-    <string name="tutorial_2">The bigger doll eats the smaller doll.</string>
+    <string name="tutorial_1">Choose the size and place it.</string>
+    <string name="tutorial_2">The bigger size eats the smaller size.</string>
     <string name="tutorial_3">Win matching the color and not the size</string>
 
 </resources>

@@ -4,6 +4,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import kotlinx.coroutines.delay
 import uk.fernando.tictactoe.datastore.GamePrefsStore
+import uk.fernando.tictactoe.enum.CellResult
 import uk.fernando.tictactoe.ext.getRandomAvatar
 import uk.fernando.tictactoe.model.CellModel
 import uk.fernando.tictactoe.model.Counter
@@ -41,20 +42,20 @@ open class TicGameViewModel(private val prefsStore: GamePrefsStore, private val 
         }
     }
 
-    open fun onPositionClick(position: Int): Boolean? {
+    open fun setCellValue(position: Int): CellResult {
         playerWinner.value?.let {
             launchDefault {
                 playerWinner.value = null
                 delay(100)
                 playerWinner.value = it
             }
-            return null
+            return CellResult.DO_NOTHING
         }
 
         return insertValueCellTicTacToe(position)
     }
 
-    open fun insertValueCellTicTacToe(position: Int): Boolean? {
+    open fun insertValueCellTicTacToe(position: Int): CellResult {
         val cell = _gamePosition[position]
         if (cell.isX == null) {
             _gamePosition[position] = cell.copy(isX = isPLayer1Turn.value)
@@ -71,11 +72,11 @@ open class TicGameViewModel(private val prefsStore: GamePrefsStore, private val 
                 }
 
                 updateWinnerCells(it)
-                return true
+                return CellResult.END_GAME
             }
-            return null
+            return CellResult.DO_NOTHING
         }
-        return false
+        return CellResult.ERROR
     }
 
     fun updateWinnerCells(counter: Counter) {

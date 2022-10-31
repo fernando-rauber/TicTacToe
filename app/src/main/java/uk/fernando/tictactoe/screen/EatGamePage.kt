@@ -1,11 +1,9 @@
 package uk.fernando.tictactoe.screen
 
 import androidx.annotation.DrawableRes
-import androidx.annotation.StringRes
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
@@ -16,14 +14,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -33,10 +29,10 @@ import uk.fernando.tictactoe.R
 import uk.fernando.tictactoe.component.MyDivider
 import uk.fernando.tictactoe.component.WinConditionIcon
 import uk.fernando.tictactoe.datastore.PrefsStore
+import uk.fernando.tictactoe.model.DollCounter
 import uk.fernando.tictactoe.theme.gold
 import uk.fernando.tictactoe.viewmodel.EatGameViewModel
 import uk.fernando.util.component.MyAnimatedVisibility
-import uk.fernando.util.component.MyButton
 import uk.fernando.util.component.MyDialog
 import uk.fernando.util.component.MyIconButton
 import uk.fernando.util.ext.clickableSingle
@@ -54,7 +50,6 @@ fun EatGamePage(
     val showTutorial = prefs.showTutorial().collectAsState(initial = false)
 
     val (highlight, setHighlight) = remember { mutableStateOf(false) }
-
 
     ModalBottomSheetLayout(
         sheetState = rememberModalBottomSheetState(
@@ -87,14 +82,22 @@ fun EatGamePage(
                 ) {
                     WinConditionIcon(winCondition, 2)
 
-                    Board(viewModel, boardSize) { setHighlight(true) }
+                    Board(
+                        viewModel = viewModel,
+                        boardSize = boardSize,
+                        onSizeNoSelected = { setHighlight(true) }
+                    )
 
                     DollCount(
                         modifier = Modifier
                             .weight(1f)
                             .padding(top = 10.dp),
                         viewModel = viewModel,
-                        highlight = highlight
+                        highlight = highlight,
+                        onSelected = {
+                            setHighlight(false)
+                            viewModel.setImageSize(it)
+                        }
                     )
 
                     Text(
@@ -116,36 +119,58 @@ fun EatGamePage(
 }
 
 @Composable
-private fun DollCount(modifier: Modifier, viewModel: EatGameViewModel, highlight: Boolean) {
-    val (isSelected, setSelected) = remember { mutableStateOf(0) }
+private fun DollCount(modifier: Modifier, viewModel: EatGameViewModel, highlight: Boolean, onSelected: (Int) -> Unit) {
+    val isPlayer1 = viewModel.isPLayer1Turn.value
 
     Row(modifier.fillMaxWidth()) {
         Column(Modifier.weight(1f)) {
-            val playerRed = viewModel.playerRed.value
-            Doll(R.drawable.eat_red, false, .9f, -1) { viewModel.setImageSize(1) }
-            Doll(R.drawable.eat_red, false, 1.2f, playerRed.size2) { viewModel.setImageSize(2) }
-            Doll(R.drawable.eat_red, false, 1.7f, playerRed.size3) { viewModel.setImageSize(3) }
+            DollColumn(
+                icon = R.drawable.eat_red,
+                sizeCounter = viewModel.playerRed.value,
+                sizeSelected = if (isPlayer1) viewModel.imageSize.value ?: 0 else 0,
+                highlight = isPlayer1 && highlight,
+                onSelected = onSelected
+            )
         }
 
         Column(
-            modifier = Modifier
-                .weight(1f)
-                .border(2.dp, if (highlight) gold else Color.Transparent),
+            modifier = Modifier.weight(1f),
             horizontalAlignment = Alignment.End
         ) {
-            val playerGreen = viewModel.playerGreen.value
-            Doll(R.drawable.eat_green, isSelected == 1, 1f, -1, true) {
-                setSelected(1)
-                viewModel.setImageSize(1)
-            }
-            Doll(R.drawable.eat_green, isSelected == 2, 1.3f, playerGreen.size2, true) {
-                setSelected(2)
-                viewModel.setImageSize(2)
-            }
-            Doll(R.drawable.eat_green, isSelected == 3, 1.6f, playerGreen.size3, true) {
-                setSelected(3)
-                viewModel.setImageSize(3)
-            }
+            DollColumn(
+                icon = R.drawable.eat_green,
+                sizeCounter = viewModel.playerGreen.value,
+                sizeSelected = if (!isPlayer1) viewModel.imageSize.value ?: 0 else 0,
+                highlight = !isPlayer1 && highlight,
+                isLeftSide = true,
+                onSelected = onSelected
+            )
+        }
+    }
+}
+
+@Composable
+private fun DollColumn(@DrawableRes icon: Int, sizeCounter: DollCounter, sizeSelected: Int, highlight: Boolean, isLeftSide: Boolean = false, onSelected: (Int) -> Unit) {
+    val alpha: Float by animateFloatAsState(
+        targetValue = if (highlight) 1f else 0f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(800,  easing = LinearOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        )
+    )
+
+    Column(
+        modifier = Modifier.border(2.dp, gold.copy(alpha)),
+        horizontalAlignment = if (isLeftSide) Alignment.End else Alignment.Start
+    ) {
+        Doll(icon, sizeSelected == 1, 1f, 99, isLeftSide) {
+            onSelected(1)
+        }
+        Doll(icon, sizeSelected == 2, 1.3f, sizeCounter.size2, isLeftSide) {
+            onSelected(2)
+        }
+        Doll(icon, sizeSelected == 3, 1.6f, sizeCounter.size3, isLeftSide) {
+            onSelected(3)
         }
     }
 }
@@ -156,7 +181,7 @@ private fun ColumnScope.Doll(@DrawableRes image: Int, isSelected: Boolean, weigh
         modifier = Modifier
             .weight(weight)
             .padding(top = 4.dp)
-            .clickableSingle { onClick() },
+            .clickableSingle(ripple = false) { if (quantity > 0) onClick() },
         verticalAlignment = Alignment.CenterVertically
     ) {
         if (!isEnd)
@@ -179,7 +204,7 @@ private fun ColumnScope.Doll(@DrawableRes image: Int, isSelected: Boolean, weigh
 //        }
 
         Text(
-            text = if (quantity == -1) "\u221e" else if (isEnd) "$quantity X" else "X $quantity",
+            text = if (quantity == 99) "\u221e" else if (isEnd) "$quantity X" else "X $quantity",
             style = MaterialTheme.typography.bodyMedium,
             color = if (isSelected) gold else Color.White,
             fontWeight = FontWeight.SemiBold,

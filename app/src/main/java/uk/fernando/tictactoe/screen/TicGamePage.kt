@@ -37,6 +37,7 @@ import org.koin.androidx.compose.getViewModel
 import uk.fernando.tictactoe.R
 import uk.fernando.tictactoe.component.NavigationTopBar
 import uk.fernando.tictactoe.component.WinConditionIcon
+import uk.fernando.tictactoe.enum.CellResult
 import uk.fernando.tictactoe.ext.getEndOffset
 import uk.fernando.tictactoe.ext.getStartOffset
 import uk.fernando.tictactoe.model.CellModel
@@ -193,7 +194,7 @@ fun BottomSheetEndRound(viewModel: TicGameViewModel, onClose: () -> Unit) {
 }
 
 @Composable
-fun Board(viewModel: TicGameViewModel, boardSize: Int, onNotSelected: () -> Unit = {}) {
+fun Board(viewModel: TicGameViewModel, boardSize: Int, onSizeNoSelected: () -> Unit = {}) {
     val audio = MediaPlayer.create(LocalContext.current, R.raw.sound_finish)
     val audioWrong = MediaPlayer.create(LocalContext.current, R.raw.bip)
 
@@ -203,14 +204,12 @@ fun Board(viewModel: TicGameViewModel, boardSize: Int, onNotSelected: () -> Unit
         content = {
             itemsIndexed(viewModel.gamePosition) { index, position ->
                 GameCell(position, boardSize) {
-                    val isEndRound = viewModel.onPositionClick(index)
-                    if (isEndRound != null) {
-                        if (isEndRound)
-                            audio.playAudio()
-                        else
-                            audioWrong.playAudio()
-                    } else
-                        onNotSelected()
+                    when (viewModel.setCellValue(index)) {
+                        CellResult.END_GAME -> audio.playAudio()
+                        CellResult.ERROR -> audioWrong.playAudio()
+                        CellResult.SIZE_NOT_SELECTED -> onSizeNoSelected()
+                        else -> {}
+                    }
                 }
             }
         }
