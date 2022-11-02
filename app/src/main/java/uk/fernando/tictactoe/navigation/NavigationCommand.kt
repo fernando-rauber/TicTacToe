@@ -66,6 +66,7 @@ object Directions {
 
     const val GAME_TYPE = "game_type"
     const val BOARD_SIZE = "board_size"
+    const val ICON_TYPE = "icon_type"
     const val WIN_CONDITION = "win_condition"
 }
 

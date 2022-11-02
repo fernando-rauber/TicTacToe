@@ -7,7 +7,6 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 
@@ -35,6 +34,10 @@ class GamePrefsStoreImpl(context: Context) : GamePrefsStore {
         return dataStore.data.map { prefs -> prefs[PreferencesKeys.GAME_TYPE] ?: 1 }.first()
     }
 
+    override suspend fun getIconType(): Int {
+        return dataStore.data.map { prefs -> prefs[PreferencesKeys.ICON_TYPE] ?: 2 }.first()
+    }
+
     override suspend fun getDifficulty(): Int {
         return dataStore.data.map { prefs -> prefs[PreferencesKeys.DIFFICULTY] ?: 1 }.first()
     }
@@ -59,6 +62,10 @@ class GamePrefsStoreImpl(context: Context) : GamePrefsStore {
         dataStore.edit { prefs -> prefs[PreferencesKeys.GAME_TYPE] = value }
     }
 
+    override suspend fun storeIconType(value: Int) {
+        dataStore.edit { prefs -> prefs[PreferencesKeys.ICON_TYPE] = value }
+    }
+
     override suspend fun storeDifficulty(value: Int) {
         dataStore.edit { prefs -> prefs[PreferencesKeys.DIFFICULTY] = value }
     }
@@ -72,6 +79,7 @@ class GamePrefsStoreImpl(context: Context) : GamePrefsStore {
         val WIN_CONDITION = intPreferencesKey("win_condition")
         val ROUNDS = intPreferencesKey("rounds")
         val GAME_TYPE = intPreferencesKey("game_type")
+        val ICON_TYPE = intPreferencesKey("icon_type")
         val DIFFICULTY = intPreferencesKey("difficulty")
         val PLAYER2_NAME = stringPreferencesKey("player2_name")
     }

@@ -1,10 +1,13 @@
 package uk.fernando.tictactoe.screen
 
 import androidx.annotation.StringRes
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -12,6 +15,7 @@ import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -23,9 +27,10 @@ import uk.fernando.tictactoe.component.MyDivider
 import uk.fernando.tictactoe.component.MyTextField
 import uk.fernando.tictactoe.component.NavigationTopBar
 import uk.fernando.tictactoe.component.WinConditionIcon
+import uk.fernando.tictactoe.enum.EatTacToeIcon
 import uk.fernando.tictactoe.navigation.Directions
 import uk.fernando.tictactoe.theme.*
-import uk.fernando.tictactoe.viewmodel.HomeViewModel
+import uk.fernando.tictactoe.viewmodel.CreateGameViewModel
 import uk.fernando.util.component.MyAnimatedVisibility
 import uk.fernando.util.component.MyButton
 import uk.fernando.util.component.MyIconButton
@@ -35,7 +40,7 @@ import uk.fernando.util.ext.safeNav
 fun CreateGamePage(
     navController: NavController = NavController(LocalContext.current),
     gameType: Int,
-    viewModel: HomeViewModel = getViewModel()
+    viewModel: CreateGameViewModel = getViewModel()
 ) {
 
     Column(modifier = Modifier.fillMaxSize()) {
@@ -59,7 +64,7 @@ fun CreateGamePage(
             modifier = Modifier
                 .padding(16.dp)
                 .weight(1f)
-            //.verticalScroll(rememberScrollState())
+//            .verticalScroll(rememberScrollState())
         ) {
 
             BoardSize(viewModel)
@@ -69,6 +74,11 @@ fun CreateGamePage(
             WinCondition(viewModel, gameType)
 
             MyDivider()
+
+            if (gameType == 2) {
+                IconChoice(viewModel)
+                MyDivider()
+            }
 
             Rounds(viewModel)
 
@@ -91,13 +101,13 @@ fun CreateGamePage(
                 .defaultMinSize(minHeight = 50.dp),
             text = stringResource(R.string.start_action).uppercase(),
             color = greenLight,
-            onClick = { navController.safeNav(Directions.game.withArgs("${viewModel.boardSize.value}", "${viewModel.winCondition.value}", "$gameType")) }
+            onClick = { navController.safeNav(Directions.game.withArgs("${viewModel.boardSize.value}", "${viewModel.winCondition.value}", "$gameType", "${viewModel.iconType.value}")) }
         )
     }
 }
 
 @Composable
-private fun ColumnScope.BoardSize(viewModel: HomeViewModel) {
+private fun ColumnScope.BoardSize(viewModel: CreateGameViewModel) {
     Text(
         text = stringResource(R.string.board_size),
         style = MaterialTheme.typography.bodyLarge,
@@ -122,7 +132,7 @@ private fun ColumnScope.BoardSize(viewModel: HomeViewModel) {
 }
 
 @Composable
-private fun WinCondition(viewModel: HomeViewModel, gameType: Int) {
+private fun WinCondition(viewModel: CreateGameViewModel, gameType: Int) {
     Text(
         text = stringResource(R.string.win_condition),
         style = MaterialTheme.typography.bodyLarge,
@@ -144,11 +154,14 @@ private fun WinCondition(viewModel: HomeViewModel, gameType: Int) {
         }
     )
 
-    WinConditionIcon(viewModel.winCondition.value, gameType)
+    WinConditionIcon(
+        winCondition = viewModel.winCondition.value,
+        iconType = if (gameType == 1) EatTacToeIcon.CLASSIC.value else viewModel.iconType.value
+    )
 }
 
 @Composable
-private fun Rounds(viewModel: HomeViewModel) {
+private fun Rounds(viewModel: CreateGameViewModel) {
     val valuesList = listOf(1, 3, 5)
 
     RowContent(title = R.string.rounds) {
@@ -163,7 +176,23 @@ private fun Rounds(viewModel: HomeViewModel) {
 }
 
 @Composable
-private fun GameType(viewModel: HomeViewModel) {
+private fun IconChoice(viewModel: CreateGameViewModel) {
+    RowContent(title = R.string.icon_choice) {
+        MyChip(
+            icon = R.drawable.doll_red,
+            isSelected = viewModel.iconType.value == EatTacToeIcon.DOLL.value,
+            onClick = { viewModel.setIconType(EatTacToeIcon.DOLL.value) }
+        )
+        MyChip(
+            icon = R.drawable.cup_red,
+            isSelected = viewModel.iconType.value == EatTacToeIcon.CUP.value,
+            onClick = { viewModel.setIconType(EatTacToeIcon.CUP.value) }
+        )
+    }
+}
+
+@Composable
+private fun GameType(viewModel: CreateGameViewModel) {
     RowContent(title = R.string.game_type) {
         MyChip(
             text = stringResource(R.string.single_player),
@@ -179,7 +208,7 @@ private fun GameType(viewModel: HomeViewModel) {
 }
 
 @Composable
-private fun AIDifficulty(viewModel: HomeViewModel) {
+private fun AIDifficulty(viewModel: CreateGameViewModel) {
     MyAnimatedVisibility(viewModel.gameType.value == 1) {
 
         Column {
@@ -208,7 +237,7 @@ private fun AIDifficulty(viewModel: HomeViewModel) {
 }
 
 @Composable
-private fun Player2Name(viewModel: HomeViewModel) {
+private fun Player2Name(viewModel: CreateGameViewModel) {
     MyAnimatedVisibility(viewModel.gameType.value == 2) {
 
         Column {
@@ -249,20 +278,32 @@ private fun RowContent(@StringRes title: Int, content: @Composable () -> Unit) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun MyChip(text: String, isSelected: Boolean, color: Color = dark, onClick: () -> Unit) {
+private fun MyChip(text: String? = null, icon: Int? = null, isSelected: Boolean, color: Color = dark, onClick: () -> Unit) {
     Card(
         onClick = onClick,
         elevation = CardDefaults.cardElevation(6.dp),
         colors = CardDefaults.cardColors(if (isSelected) color else greyLight),
     ) {
-        Text(
-            modifier = Modifier
-                .align(CenterHorizontally)
-                .padding(horizontal = 24.dp, vertical = 3.dp),
-            text = text,
-            color = Color.White,
-            textAlign = TextAlign.Center
-        )
+        text?.let {
+            Text(
+                modifier = Modifier
+                    .align(CenterHorizontally)
+                    .padding(horizontal = 24.dp, vertical = 3.dp),
+                text = text,
+                color = Color.White,
+                textAlign = TextAlign.Center
+            )
+        }
+        icon?.let {
+            Image(
+                modifier = Modifier
+                    .align(CenterHorizontally)
+                    .padding(horizontal = 24.dp, vertical = 3.dp)
+                    .size(32.dp),
+                painter = painterResource(icon),
+                contentDescription = null
+            )
+        }
     }
 }
 

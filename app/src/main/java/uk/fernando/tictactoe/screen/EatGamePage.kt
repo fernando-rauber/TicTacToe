@@ -29,6 +29,7 @@ import uk.fernando.tictactoe.R
 import uk.fernando.tictactoe.component.MyDivider
 import uk.fernando.tictactoe.component.WinConditionIcon
 import uk.fernando.tictactoe.datastore.PrefsStore
+import uk.fernando.tictactoe.ext.getIcon
 import uk.fernando.tictactoe.model.SizeModel
 import uk.fernando.tictactoe.theme.gold
 import uk.fernando.tictactoe.viewmodel.EatGameViewModel
@@ -42,6 +43,7 @@ import uk.fernando.util.ext.clickableSingle
 fun EatGamePage(
     navController: NavController = NavController(LocalContext.current),
     boardSize: Int,
+    iconType: Int,
     winCondition: Int,
     viewModel: EatGameViewModel = getViewModel()
 ) {
@@ -49,7 +51,7 @@ fun EatGamePage(
     val prefs: PrefsStore by inject()
     val showTutorial = prefs.showTutorial().collectAsState(initial = false)
 
-    val (highlight, setHighlight) = remember { mutableStateOf(false) }
+    val (highlightSize, setHighlightSize) = remember { mutableStateOf(false) }
 
     ModalBottomSheetLayout(
         sheetState = rememberModalBottomSheetState(
@@ -80,12 +82,13 @@ fun EatGamePage(
                     horizontalAlignment = CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                 ) {
-                    WinConditionIcon(winCondition, 2)
+                    WinConditionIcon(winCondition, iconType)
 
                     Board(
                         viewModel = viewModel,
                         boardSize = boardSize,
-                        onSizeNoSelected = { setHighlight(true) }
+                        iconType = iconType,
+                        onSizeNoSelected = { setHighlightSize(true) }
                     )
 
                     ItemSizeCount(
@@ -93,9 +96,10 @@ fun EatGamePage(
                             .weight(1f)
                             .padding(top = 10.dp),
                         viewModel = viewModel,
-                        highlight = highlight,
+                        iconType =  iconType,
+                        highlight = highlightSize,
                         onSelected = {
-                            setHighlight(false)
+                            setHighlightSize(false)
                             viewModel.setImageSize(it)
                         }
                     )
@@ -112,20 +116,23 @@ fun EatGamePage(
             }
 
             MyAnimatedVisibility(showTutorial.value) {
-                MyTutorialDialog(onClose = viewModel::closeTutorial)
+                MyTutorialDialog(
+                    iconType = iconType,
+                    onClose = viewModel::closeTutorial
+                )
             }
         }
     }
 }
 
 @Composable
-private fun ItemSizeCount(modifier: Modifier, viewModel: EatGameViewModel, highlight: Boolean, onSelected: (Int) -> Unit) {
+private fun ItemSizeCount(modifier: Modifier, viewModel: EatGameViewModel, iconType: Int, highlight: Boolean, onSelected: (Int) -> Unit) {
     val isPlayer1 = viewModel.isPLayer1Turn.value
 
     Row(modifier.fillMaxWidth()) {
         Column(Modifier.weight(1f)) {
             SizeColumn(
-                icon = R.drawable.eat_red,
+                icon = iconType.getIcon(true) ,
                 sizeCounter = viewModel.playerRed.value,
                 sizeSelected = if (isPlayer1) viewModel.imageSize.value ?: 0 else 0,
                 highlight = isPlayer1 && highlight,
@@ -138,7 +145,7 @@ private fun ItemSizeCount(modifier: Modifier, viewModel: EatGameViewModel, highl
             horizontalAlignment = Alignment.End
         ) {
             SizeColumn(
-                icon = R.drawable.eat_green,
+                icon = iconType.getIcon(false),
                 sizeCounter = viewModel.playerGreen.value,
                 sizeSelected = if (!isPlayer1) viewModel.imageSize.value ?: 0 else 0,
                 highlight = !isPlayer1 && highlight,
@@ -233,7 +240,7 @@ private fun ColumnScope.SizeOption(@DrawableRes image: Int, isSelected: Boolean,
 }
 
 @Composable
-private fun MyTutorialDialog(onClose: () -> Unit) {
+private fun MyTutorialDialog( iconType:Int, onClose: () -> Unit) {
     MyDialog {
         Box(Modifier.border(2.dp, Color.White.copy(.3f), MaterialTheme.shapes.small)) {
             Column(
@@ -258,20 +265,22 @@ private fun MyTutorialDialog(onClose: () -> Unit) {
                     textAlign = TextAlign.Center
                 )
 
+                val icon = painterResource(iconType.getIcon(true))
+
                 Row(verticalAlignment = Alignment.Bottom) {
                     Image(
                         modifier = Modifier.size(24.dp),
-                        painter = painterResource(R.drawable.eat_red),
+                        painter = icon,
                         contentDescription = null
                     )
                     Image(
                         modifier = Modifier.size(36.dp),
-                        painter = painterResource(R.drawable.eat_red),
+                        painter = icon,
                         contentDescription = null
                     )
                     Image(
                         modifier = Modifier.size(48.dp),
-                        painter = painterResource(R.drawable.eat_red),
+                        painter = icon,
                         contentDescription = null
                     )
                 }
@@ -304,14 +313,14 @@ private fun MyTutorialDialog(onClose: () -> Unit) {
                     ) {
                         Image(
                             modifier = Modifier.size(24.dp),
-                            painter = painterResource(R.drawable.eat_red),
+                            painter = icon,
                             contentDescription = null
                         )
                         Image(
                             modifier = Modifier
                                 .size(36.dp)
                                 .offset(offset),
-                            painter = painterResource(R.drawable.eat_red),
+                            painter = icon,
                             contentDescription = null
                         )
                     }
@@ -332,14 +341,14 @@ private fun MyTutorialDialog(onClose: () -> Unit) {
                     ) {
                         Image(
                             modifier = Modifier.size(36.dp),
-                            painter = painterResource(R.drawable.eat_red),
+                            painter = icon,
                             contentDescription = null
                         )
                         Image(
                             modifier = Modifier
                                 .size(48.dp)
                                 .offset(offset2),
-                            painter = painterResource(R.drawable.eat_red),
+                            painter = icon,
                             contentDescription = null
                         )
                     }
@@ -366,17 +375,17 @@ private fun MyTutorialDialog(onClose: () -> Unit) {
                     ) {
                         Image(
                             modifier = Modifier.size(48.dp),
-                            painter = painterResource(R.drawable.eat_red),
+                            painter = icon,
                             contentDescription = null
                         )
                         Image(
                             modifier = Modifier.size(24.dp),
-                            painter = painterResource(R.drawable.eat_red),
+                            painter = icon,
                             contentDescription = null
                         )
                         Image(
                             modifier = Modifier.size(36.dp),
-                            painter = painterResource(R.drawable.eat_red),
+                            painter = icon,
                             contentDescription = null
                         )
                     }

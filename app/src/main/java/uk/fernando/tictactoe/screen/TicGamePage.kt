@@ -38,7 +38,9 @@ import uk.fernando.tictactoe.R
 import uk.fernando.tictactoe.component.NavigationTopBar
 import uk.fernando.tictactoe.component.WinConditionIcon
 import uk.fernando.tictactoe.enum.CellResult
+import uk.fernando.tictactoe.enum.EatTacToeIcon
 import uk.fernando.tictactoe.ext.getEndOffset
+import uk.fernando.tictactoe.ext.getIcon
 import uk.fernando.tictactoe.ext.getStartOffset
 import uk.fernando.tictactoe.model.CellModel
 import uk.fernando.tictactoe.theme.dark
@@ -88,7 +90,7 @@ fun TicGamePage(
             ) {
                 WinConditionIcon(winCondition, 1)
 
-                Board(viewModel, boardSize)
+                Board(viewModel, boardSize, EatTacToeIcon.CLASSIC.value)
 
                 Text(
                     text = stringResource(R.string.current_round, viewModel.currentRound.value, viewModel.rounds.value),
@@ -194,7 +196,7 @@ fun BottomSheetEndRound(viewModel: TicGameViewModel, onClose: () -> Unit) {
 }
 
 @Composable
-fun Board(viewModel: TicGameViewModel, boardSize: Int, onSizeNoSelected: () -> Unit = {}) {
+fun Board(viewModel: TicGameViewModel, boardSize: Int, iconType : Int, onSizeNoSelected: () -> Unit = {}) {
     val audio = MediaPlayer.create(LocalContext.current, R.raw.sound_finish)
     val audioWrong = MediaPlayer.create(LocalContext.current, R.raw.bip)
 
@@ -203,7 +205,7 @@ fun Board(viewModel: TicGameViewModel, boardSize: Int, onSizeNoSelected: () -> U
         columns = GridCells.Fixed(boardSize),
         content = {
             itemsIndexed(viewModel.gamePosition) { index, position ->
-                GameCell(position, boardSize) {
+                GameCell(position, boardSize, iconType) {
                     when (viewModel.setCellValue(index)) {
                         CellResult.END_GAME -> audio.playAudio()
                         CellResult.ERROR -> audioWrong.playAudio()
@@ -349,7 +351,7 @@ private fun PLayerName(modifier: Modifier, @DrawableRes icon: Int, name: String)
 }
 
 @Composable
-private fun GameCell(position: CellModel, boardSize: Int, onClick: () -> Unit) {
+private fun GameCell(position: CellModel, boardSize: Int, iconType : Int, onClick: () -> Unit) {
     Box(
         Modifier
             .fillMaxSize()
@@ -358,19 +360,11 @@ private fun GameCell(position: CellModel, boardSize: Int, onClick: () -> Unit) {
     ) {
 
         position.isX?.let { isX ->
-            val image = if (position.size == null) {
-                if (isX) R.drawable.img_x
-                else R.drawable.img_o
-            } else {
-                if (isX) R.drawable.eat_red
-                else R.drawable.eat_green
-            }
-
             Image(
                 modifier = Modifier
                     .align(Center)
                     .fillMaxSize(if (position.size == null) .6f else (.2f * position.size) + .1f),
-                painter = painterResource(image),
+                painter = painterResource(iconType.getIcon(isX)),
                 contentDescription = null,
             )
         }

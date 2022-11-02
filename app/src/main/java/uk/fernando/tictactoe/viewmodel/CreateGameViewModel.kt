@@ -4,11 +4,12 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import uk.fernando.tictactoe.datastore.GamePrefsStore
 
-class HomeViewModel(private val prefsStore: GamePrefsStore) : BaseViewModel() {
+class CreateGameViewModel(private val prefsStore: GamePrefsStore) : BaseViewModel() {
 
     val boardSize = mutableStateOf(3)
     val winCondition = mutableStateOf(3)
     val rounds = mutableStateOf(3)
+    val iconType = mutableStateOf(1)
     val gameType = mutableStateOf(1)
     val difficulty = mutableStateOf(1)
     val playerName = mutableStateOf("Player 2")
@@ -21,6 +22,7 @@ class HomeViewModel(private val prefsStore: GamePrefsStore) : BaseViewModel() {
             boardSize.value = prefsStore.getBoardSize()
             winCondition.value = prefsStore.getWinCondition()
             rounds.value = prefsStore.getRounds()
+            iconType.value = prefsStore.getIconType()
             gameType.value = prefsStore.getGameType()
             difficulty.value = prefsStore.getDifficulty()
             playerName.value = prefsStore.getPLayer2Name()
@@ -49,6 +51,11 @@ class HomeViewModel(private val prefsStore: GamePrefsStore) : BaseViewModel() {
     fun setRounds(value: Int) {
         rounds.value = value
         launchDefault { prefsStore.storeRounds(value) }
+    }
+
+    fun setIconType(value: Int) {
+        iconType.value = value
+        launchDefault { prefsStore.storeIconType(value) }
     }
 
     fun setGameType(value: Int) {

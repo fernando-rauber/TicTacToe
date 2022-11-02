@@ -14,7 +14,7 @@ import uk.fernando.tictactoe.datastore.PrefsStore
 import uk.fernando.tictactoe.datastore.PrefsStoreImpl
 import uk.fernando.tictactoe.usecase.GameUseCase
 import uk.fernando.tictactoe.viewmodel.EatGameViewModel
-import uk.fernando.tictactoe.viewmodel.HomeViewModel
+import uk.fernando.tictactoe.viewmodel.CreateGameViewModel
 import uk.fernando.tictactoe.viewmodel.TicGameViewModel
 
 object KoinModule {
@@ -42,7 +42,7 @@ object KoinModule {
 
     private val viewModelModule: Module
         get() = module {
-            viewModel { HomeViewModel(get()) }
+            viewModel { CreateGameViewModel(get()) }
             viewModel { TicGameViewModel(get(), get()) }
             viewModel { EatGameViewModel(get(), get(), get()) }
         }

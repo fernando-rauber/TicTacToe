@@ -6,6 +6,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import uk.fernando.tictactoe.navigation.Directions.BOARD_SIZE
 import uk.fernando.tictactoe.navigation.Directions.GAME_TYPE
+import uk.fernando.tictactoe.navigation.Directions.ICON_TYPE
 import uk.fernando.tictactoe.navigation.Directions.WIN_CONDITION
 import uk.fernando.tictactoe.screen.*
 
@@ -25,18 +26,19 @@ fun NavGraphBuilder.buildGraph(navController: NavController) {
             CreateGamePage(navController, type.toInt())
     }
 
-    composable(Directions.game.withArgsFormat(BOARD_SIZE, WIN_CONDITION, GAME_TYPE)) {
+    composable(Directions.game.withArgsFormat(BOARD_SIZE, WIN_CONDITION, GAME_TYPE, ICON_TYPE)) {
         val boardSize = it.arguments?.getString(BOARD_SIZE)
         val winCondition = it.arguments?.getString(WIN_CONDITION)
         val type = it.arguments?.getString(GAME_TYPE)
+        val iconType = it.arguments?.getString(ICON_TYPE)
 
-        if (boardSize == null || winCondition == null)
+        if (boardSize == null || winCondition == null || iconType == null)
             navController.popBackStack()
         else {
             if (type == "1")
                 TicGamePage(navController, boardSize.toInt(), winCondition.toInt())
             else
-                EatGamePage(navController, boardSize.toInt(), winCondition.toInt())
+                EatGamePage(navController, boardSize.toInt(), iconType.toInt(), winCondition.toInt())
         }
     }
 

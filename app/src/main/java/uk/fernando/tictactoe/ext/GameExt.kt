@@ -2,6 +2,8 @@ package uk.fernando.tictactoe.ext
 
 import androidx.compose.ui.geometry.Offset
 import uk.fernando.tictactoe.R
+import uk.fernando.tictactoe.enum.EatTacToeIcon
+import uk.fernando.tictactoe.enum.EatTacToeIcon.Companion.getByValue
 import uk.fernando.tictactoe.enum.WinnerDirection
 
 fun WinnerDirection.getStartOffset(width: Float, padding: Boolean): Offset {
@@ -42,9 +44,10 @@ fun getRandomAvatar(value: Int = 0) =
         R.drawable.ic_tiger
     ).filter { it != value }.shuffled().first()
 
-fun Int.isPlayerX(): Boolean {
-    return when (this) {
-        R.drawable.img_x -> true
-        else -> false
+fun Int.getIcon(isPLayer1 : Boolean): Int {
+    return when(getByValue(this)){
+        EatTacToeIcon.DOLL -> if(isPLayer1) R.drawable.doll_red else R.drawable.doll_green
+        EatTacToeIcon.CUP -> if(isPLayer1) R.drawable.cup_red else R.drawable.cup_green
+        else -> if(isPLayer1) R.drawable.img_x else R.drawable.img_o
     }
 }
