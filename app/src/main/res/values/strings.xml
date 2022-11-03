@@ -43,4 +43,11 @@
     <string name="tutorial_2">The bigger size eats the smaller size.</string>
     <string name="tutorial_3">Win matching the color and not the size.</string>
 
+    // Settings
+    <string name="settings_title">Settings</string>
+    <string name="sound">Sound Enabled</string>
+    <string name="sound_subtext">Enable sound effects</string>
+    <string name="privacy_policy">Privacy Policy</string>
+    <string name="version">Version %s</string>
+
 </resources>

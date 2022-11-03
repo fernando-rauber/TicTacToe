@@ -50,7 +50,7 @@ fun CreateGamePage(
                 MyIconButton(
                     icon = R.drawable.ic_settings,
                     modifier = Modifier.align(Alignment.CenterEnd),
-                    onClick = { },
+                    onClick = { navController.safeNav(Directions.settings.path) },
                     tint = MaterialTheme.colorScheme.onBackground
                 )
             }

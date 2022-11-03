@@ -24,7 +24,8 @@ import uk.fernando.util.component.MyIconButton
 @Composable
 fun NavigationTopBar(
     onBackClick: (() -> Unit)? = null,
-    gameType: Int,
+    title: String? = null,
+    gameType: Int? = null,
     rightIcon: (@Composable BoxScope.() -> Unit)? = null
 ) {
     Box(
@@ -41,24 +42,35 @@ fun NavigationTopBar(
                 tint = MaterialTheme.colorScheme.onBackground
             )
 
-        Text(
-            modifier = Modifier.align(Alignment.Center),
-            text = buildAnnotatedString {
-                withStyle(style = SpanStyle(greenLight)) {
-                    append(stringResource(if (gameType == 1) R.string.tic else R.string.eat))
-                }
-                append(" ")
-                withStyle(style = SpanStyle(gold)) {
-                    append(stringResource(R.string.tac))
-                }
-                append(" ")
-                withStyle(style = SpanStyle(red)) {
-                    append(stringResource(R.string.toe))
-                }
-            },
-            fontWeight = FontWeight.ExtraBold,
-            style = MaterialTheme.typography.titleLarge
-        )
+        title?.let {
+            Text(
+                modifier = Modifier.align(Alignment.Center),
+                text = title,
+                color = MaterialTheme.colorScheme.onBackground,
+                style = MaterialTheme.typography.titleMedium
+            )
+        }
+
+        gameType?.let {
+            Text(
+                modifier = Modifier.align(Alignment.Center),
+                text = buildAnnotatedString {
+                    withStyle(style = SpanStyle(greenLight)) {
+                        append(stringResource(if (gameType == 1) R.string.tic else R.string.eat))
+                    }
+                    append(" ")
+                    withStyle(style = SpanStyle(gold)) {
+                        append(stringResource(R.string.tac))
+                    }
+                    append(" ")
+                    withStyle(style = SpanStyle(red)) {
+                        append(stringResource(R.string.toe))
+                    }
+                },
+                fontWeight = FontWeight.ExtraBold,
+                style = MaterialTheme.typography.titleLarge
+            )
+        }
 
         if (rightIcon != null)
             rightIcon()

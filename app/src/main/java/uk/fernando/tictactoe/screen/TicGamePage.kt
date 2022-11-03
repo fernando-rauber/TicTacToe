@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import org.koin.androidx.compose.getViewModel
 import uk.fernando.tictactoe.R
+import uk.fernando.tictactoe.component.NavigationTopBar
 import uk.fernando.tictactoe.component.WinConditionIcon
 import uk.fernando.tictactoe.enum.CellResult
 import uk.fernando.tictactoe.enum.GameIcon
@@ -106,37 +107,27 @@ fun TicGamePage(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GameTopBar(viewModel: TicGameViewModel, onClose: () -> Unit) {
-    Box(
-        Modifier
-            .fillMaxWidth()
-            .padding(vertical = 5.dp)
-    ) {
-
-        Text(
-            modifier = Modifier.align(Center),
-            text = stringResource(R.string.current_round, viewModel.currentRound.value, viewModel.rounds.value),
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onBackground,
-            fontWeight = FontWeight.SemiBold
-        )
-
-        Card(
-            modifier = Modifier
-                .align(Alignment.CenterEnd)
-                .padding(end = 8.dp),
-            onClick = onClose,
-            shape = CircleShape,
-            elevation = CardDefaults.cardElevation(4.dp),
-            colors = CardDefaults.cardColors(Color.White),
-        ) {
-            Icon(
-                painter = painterResource(R.drawable.ic_close),
-                modifier = Modifier.padding(8.dp),
-                contentDescription = null,
-                tint = Color.Black.copy(.7f)
-            )
+    NavigationTopBar(
+        title = stringResource(R.string.current_round, viewModel.currentRound.value, viewModel.rounds.value),
+        rightIcon = {
+            Card(
+                modifier = Modifier
+                    .align(Alignment.CenterEnd)
+                    .padding(end = 8.dp),
+                onClick = onClose,
+                shape = CircleShape,
+                elevation = CardDefaults.cardElevation(4.dp),
+                colors = CardDefaults.cardColors(Color.White),
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_close),
+                    modifier = Modifier.padding(8.dp),
+                    contentDescription = null,
+                    tint = Color.Black.copy(.7f)
+                )
+            }
         }
-    }
+    )
 }
 
 @Composable
