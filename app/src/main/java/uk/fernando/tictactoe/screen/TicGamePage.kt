@@ -38,7 +38,7 @@ import uk.fernando.tictactoe.R
 import uk.fernando.tictactoe.component.NavigationTopBar
 import uk.fernando.tictactoe.component.WinConditionIcon
 import uk.fernando.tictactoe.enum.CellResult
-import uk.fernando.tictactoe.enum.EatTacToeIcon
+import uk.fernando.tictactoe.enum.GameIcon
 import uk.fernando.tictactoe.ext.getEndOffset
 import uk.fernando.tictactoe.ext.getIcon
 import uk.fernando.tictactoe.ext.getStartOffset
@@ -90,7 +90,7 @@ fun TicGamePage(
             ) {
                 WinConditionIcon(winCondition, 1)
 
-                Board(viewModel, boardSize, EatTacToeIcon.CLASSIC.value)
+                Board(viewModel, boardSize, GameIcon.CLASSIC.value)
 
                 Text(
                     text = stringResource(R.string.current_round, viewModel.currentRound.value, viewModel.rounds.value),
@@ -100,7 +100,7 @@ fun TicGamePage(
                 )
             }
 
-            BottomBar(viewModel)
+            BottomBar(viewModel, GameIcon.CLASSIC.value)
         }
     }
 }
@@ -196,16 +196,18 @@ fun BottomSheetEndRound(viewModel: TicGameViewModel, onClose: () -> Unit) {
 }
 
 @Composable
-fun Board(viewModel: TicGameViewModel, boardSize: Int, iconType : Int, onSizeNoSelected: () -> Unit = {}) {
+fun Board(viewModel: TicGameViewModel, boardSize: Int, gameIcon: Int, onSizeNoSelected: () -> Unit = {}) {
     val audio = MediaPlayer.create(LocalContext.current, R.raw.sound_finish)
     val audioWrong = MediaPlayer.create(LocalContext.current, R.raw.bip)
 
     LazyVerticalGrid(
-        modifier = Modifier.padding(horizontal = 42.dp, vertical = 20.dp),
+        modifier = Modifier
+            .fillMaxWidth(.8f)
+            .padding(vertical = 15.dp),
         columns = GridCells.Fixed(boardSize),
         content = {
             itemsIndexed(viewModel.gamePosition) { index, position ->
-                GameCell(position, boardSize, iconType) {
+                GameCell(position, boardSize, gameIcon) {
                     when (viewModel.setCellValue(index)) {
                         CellResult.END_GAME -> audio.playAudio()
                         CellResult.ERROR -> audioWrong.playAudio()
@@ -219,17 +221,17 @@ fun Board(viewModel: TicGameViewModel, boardSize: Int, iconType : Int, onSizeNoS
 }
 
 @Composable
-fun BottomBar(viewModel: TicGameViewModel) {
+fun BottomBar(viewModel: TicGameViewModel, gameIcon: Int) {
     Box(
         Modifier
-            .fillMaxHeight(0.25f)
+            .fillMaxHeight(0.2f)
             .fillMaxWidth()
     ) {
 
         Column(
             Modifier
                 .align(Alignment.BottomCenter)
-                .fillMaxHeight(0.6f)
+                .fillMaxHeight(0.8f)
         ) {
 
             Text(
@@ -253,7 +255,7 @@ fun BottomBar(viewModel: TicGameViewModel) {
                 ) {
                     PLayerName(
                         modifier = Modifier.align(Alignment.CenterEnd),
-                        icon = R.drawable.img_x,
+                        icon = gameIcon.getIcon(true),
                         name = viewModel.player1.value.name
                     )
                 }
@@ -271,7 +273,7 @@ fun BottomBar(viewModel: TicGameViewModel) {
                 ) {
                     PLayerName(
                         modifier = Modifier.align(Alignment.CenterStart),
-                        icon = R.drawable.img_o,
+                        icon = gameIcon.getIcon(false),
                         name = viewModel.player2.value.name
                     )
                 }
@@ -281,7 +283,7 @@ fun BottomBar(viewModel: TicGameViewModel) {
         Row(
             Modifier
                 .align(TopCenter)
-                .fillMaxHeight(0.9f)
+                .fillMaxHeight(0.8f)
         ) {
             BottomBarAvatar(viewModel.player1.value.avatar, viewModel.isPLayer1Turn.value)
 
@@ -301,7 +303,7 @@ private fun BottomBarAvatar(avatar: Int, isPlayerTurn: Boolean) {
             targetValue = (-10).dp,
             typeConverter = Dp.VectorConverter,
             animationSpec = infiniteRepeatable(
-                animation = tween(450, easing = LinearEasing),
+                animation = tween(350, easing = LinearOutSlowInEasing),
                 repeatMode = RepeatMode.Reverse
             )
         )
@@ -331,11 +333,12 @@ private fun PLayerName(modifier: Modifier, @DrawableRes icon: Int, name: String)
     Column(
         modifier = modifier
             .fillMaxWidth(0.5f)
-            .padding(horizontal = 10.dp),
+            .padding(horizontal = 10.dp)
+            .padding(top = 3.dp),
         horizontalAlignment = CenterHorizontally
     ) {
         Image(
-            modifier = Modifier.size(18.dp),
+            modifier = Modifier.size(24.dp),
             painter = painterResource(icon),
             contentDescription = null,
         )
@@ -351,7 +354,7 @@ private fun PLayerName(modifier: Modifier, @DrawableRes icon: Int, name: String)
 }
 
 @Composable
-private fun GameCell(position: CellModel, boardSize: Int, iconType : Int, onClick: () -> Unit) {
+private fun GameCell(position: CellModel, boardSize: Int, gameIcon: Int, onClick: () -> Unit) {
     Box(
         Modifier
             .fillMaxSize()
@@ -364,7 +367,7 @@ private fun GameCell(position: CellModel, boardSize: Int, iconType : Int, onClic
                 modifier = Modifier
                     .align(Center)
                     .fillMaxSize(if (position.size == null) .6f else (.2f * position.size) + .1f),
-                painter = painterResource(iconType.getIcon(isX)),
+                painter = painterResource(gameIcon.getIcon(isX)),
                 contentDescription = null,
             )
         }

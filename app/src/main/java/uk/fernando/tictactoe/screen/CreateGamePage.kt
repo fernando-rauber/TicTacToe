@@ -3,9 +3,6 @@ package uk.fernando.tictactoe.screen
 import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
@@ -27,7 +24,7 @@ import uk.fernando.tictactoe.component.MyDivider
 import uk.fernando.tictactoe.component.MyTextField
 import uk.fernando.tictactoe.component.NavigationTopBar
 import uk.fernando.tictactoe.component.WinConditionIcon
-import uk.fernando.tictactoe.enum.EatTacToeIcon
+import uk.fernando.tictactoe.enum.GameIcon
 import uk.fernando.tictactoe.navigation.Directions
 import uk.fernando.tictactoe.theme.*
 import uk.fernando.tictactoe.viewmodel.CreateGameViewModel
@@ -58,14 +55,13 @@ fun CreateGamePage(
             }
         )
 
-        Spacer(Modifier.height(30.dp))
-
         Column(
             modifier = Modifier
-                .padding(16.dp)
+                .padding(horizontal = 16.dp)
                 .weight(1f)
-//            .verticalScroll(rememberScrollState())
+                .verticalScroll(rememberScrollState())
         ) {
+            Spacer(Modifier.height(20.dp))
 
             BoardSize(viewModel)
 
@@ -88,7 +84,7 @@ fun CreateGamePage(
 
             MyDivider()
 
-            Box {
+            Box(Modifier.padding(bottom = 16.dp)) {
                 AIDifficulty(viewModel)
                 Player2Name(viewModel)
             }
@@ -97,7 +93,7 @@ fun CreateGamePage(
         MyButton(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
+                .padding(start = 16.dp, bottom = 16.dp, end = 16.dp)
                 .defaultMinSize(minHeight = 50.dp),
             text = stringResource(R.string.start_action).uppercase(),
             color = greenLight,
@@ -139,24 +135,19 @@ private fun WinCondition(viewModel: CreateGameViewModel, gameType: Int) {
         color = MaterialTheme.colorScheme.onBackground
     )
 
-    LazyVerticalGrid(
-        columns = GridCells.Adaptive(64.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        contentPadding = PaddingValues(vertical = 8.dp),
-        content = {
-            items(viewModel.winConditionList) { win ->
-                MyChip(
-                    text = "$win",
-                    isSelected = viewModel.winCondition.value == win,
-                    onClick = { viewModel.setWinCondition(win) }
-                )
-            }
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        viewModel.winConditionList.forEach { win ->
+            MyChip(
+                text = "$win",
+                isSelected = viewModel.winCondition.value == win,
+                onClick = { viewModel.setWinCondition(win) }
+            )
         }
-    )
+    }
 
     WinConditionIcon(
         winCondition = viewModel.winCondition.value,
-        iconType = if (gameType == 1) EatTacToeIcon.CLASSIC.value else viewModel.iconType.value
+        iconType = if (gameType == 1) GameIcon.CLASSIC.value else viewModel.iconType.value
     )
 }
 
@@ -180,13 +171,13 @@ private fun IconChoice(viewModel: CreateGameViewModel) {
     RowContent(title = R.string.icon_choice) {
         MyChip(
             icon = R.drawable.doll_red,
-            isSelected = viewModel.iconType.value == EatTacToeIcon.DOLL.value,
-            onClick = { viewModel.setIconType(EatTacToeIcon.DOLL.value) }
+            isSelected = viewModel.iconType.value == GameIcon.DOLL.value,
+            onClick = { viewModel.setIconType(GameIcon.DOLL.value) }
         )
         MyChip(
             icon = R.drawable.cup_red,
-            isSelected = viewModel.iconType.value == EatTacToeIcon.CUP.value,
-            onClick = { viewModel.setIconType(EatTacToeIcon.CUP.value) }
+            isSelected = viewModel.iconType.value == GameIcon.CUP.value,
+            onClick = { viewModel.setIconType(GameIcon.CUP.value) }
         )
     }
 }

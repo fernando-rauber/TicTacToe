@@ -12,7 +12,7 @@ import androidx.compose.ui.unit.dp
 import uk.fernando.tictactoe.ext.getIcon
 
 @Composable
-fun WinConditionIcon(winCondition: Int, iconType: Int) {
+fun WinConditionIcon(winCondition: Int, gameIcon: Int) {
     Box(
         modifier = Modifier.fillMaxWidth(),
         contentAlignment = Alignment.Center
@@ -26,8 +26,8 @@ fun WinConditionIcon(winCondition: Int, iconType: Int) {
                     Image(
                         modifier = Modifier
                             .padding(start = 1.dp)
-                            .size(32.dp),
-                        painter = painterResource(iconType.getIcon(true)),
+                            .size(24.dp),
+                        painter = painterResource(gameIcon.getIcon(true)),
                         contentDescription = null
                     )
                 }

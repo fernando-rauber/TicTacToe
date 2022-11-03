@@ -75,7 +75,7 @@ class CreateGameViewModel(private val prefsStore: GamePrefsStore) : BaseViewMode
     private fun updateWinConditionList(boardSize: Int) {
         _winConditionList.clear()
 
-        for (i in 3..if (boardSize <= 8) boardSize else 8) {
+        for (i in 3..if (boardSize <= 6) boardSize else 6) {
             _winConditionList.add(i)
         }
     }

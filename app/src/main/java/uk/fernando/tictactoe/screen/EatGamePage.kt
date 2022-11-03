@@ -43,7 +43,7 @@ import uk.fernando.util.ext.clickableSingle
 fun EatGamePage(
     navController: NavController = NavController(LocalContext.current),
     boardSize: Int,
-    iconType: Int,
+    gameIcon: Int,
     winCondition: Int,
     viewModel: EatGameViewModel = getViewModel()
 ) {
@@ -76,32 +76,17 @@ fun EatGamePage(
                 )
 
                 Column(
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(vertical = 30.dp),
+                    modifier = Modifier.weight(1f),
                     horizontalAlignment = CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                 ) {
-                    WinConditionIcon(winCondition, iconType)
+                    WinConditionIcon(winCondition, gameIcon)
 
                     Board(
                         viewModel = viewModel,
                         boardSize = boardSize,
-                        iconType = iconType,
+                        gameIcon = gameIcon,
                         onSizeNoSelected = { setHighlightSize(true) }
-                    )
-
-                    ItemSizeCount(
-                        modifier = Modifier
-                            .weight(1f)
-                            .padding(top = 10.dp),
-                        viewModel = viewModel,
-                        iconType =  iconType,
-                        highlight = highlightSize,
-                        onSelected = {
-                            setHighlightSize(false)
-                            viewModel.setImageSize(it)
-                        }
                     )
 
                     Text(
@@ -110,14 +95,24 @@ fun EatGamePage(
                         color = MaterialTheme.colorScheme.onBackground,
                         fontWeight = FontWeight.SemiBold
                     )
+
+                    ItemSizeCount(
+                        viewModel = viewModel,
+                        gameIcon = gameIcon,
+                        highlight = highlightSize,
+                        onSelected = {
+                            setHighlightSize(false)
+                            viewModel.setImageSize(it)
+                        }
+                    )
                 }
 
-                BottomBar(viewModel)
+                BottomBar(viewModel, gameIcon)
             }
 
             MyAnimatedVisibility(showTutorial.value) {
                 MyTutorialDialog(
-                    iconType = iconType,
+                    gameIcon = gameIcon,
                     onClose = viewModel::closeTutorial
                 )
             }
@@ -126,13 +121,14 @@ fun EatGamePage(
 }
 
 @Composable
-private fun ItemSizeCount(modifier: Modifier, viewModel: EatGameViewModel, iconType: Int, highlight: Boolean, onSelected: (Int) -> Unit) {
+private fun ItemSizeCount(viewModel: EatGameViewModel, gameIcon: Int, highlight: Boolean, onSelected: (Int) -> Unit) {
     val isPlayer1 = viewModel.isPLayer1Turn.value
 
-    Row(modifier.fillMaxWidth()) {
+    Row(Modifier.padding(horizontal = 8.dp)) {
+
         Column(Modifier.weight(1f)) {
             SizeColumn(
-                icon = iconType.getIcon(true) ,
+                icon = gameIcon.getIcon(true),
                 sizeCounter = viewModel.playerRed.value,
                 sizeSelected = if (isPlayer1) viewModel.imageSize.value ?: 0 else 0,
                 highlight = isPlayer1 && highlight,
@@ -140,16 +136,18 @@ private fun ItemSizeCount(modifier: Modifier, viewModel: EatGameViewModel, iconT
             )
         }
 
+        Spacer(Modifier.weight(.7f))
+
         Column(
             modifier = Modifier.weight(1f),
             horizontalAlignment = Alignment.End
         ) {
             SizeColumn(
-                icon = iconType.getIcon(false),
+                icon = gameIcon.getIcon(false),
                 sizeCounter = viewModel.playerGreen.value,
                 sizeSelected = if (!isPlayer1) viewModel.imageSize.value ?: 0 else 0,
+                isLeft = true,
                 highlight = !isPlayer1 && highlight,
-                isLeftSide = true,
                 onSelected = onSelected
             )
         }
@@ -157,90 +155,60 @@ private fun ItemSizeCount(modifier: Modifier, viewModel: EatGameViewModel, iconT
 }
 
 @Composable
-private fun SizeColumn(@DrawableRes icon: Int, sizeCounter: SizeModel, sizeSelected: Int, highlight: Boolean, isLeftSide: Boolean = false, onSelected: (Int) -> Unit) {
-    val alpha: Float by animateFloatAsState(
+private fun SizeColumn(@DrawableRes icon: Int, sizeCounter: SizeModel, sizeSelected: Int, highlight: Boolean, isLeft: Boolean = false, onSelected: (Int) -> Unit) {
+    val alpha by animateFloatAsState(
         targetValue = if (highlight) 1f else 0f,
         animationSpec = infiniteRepeatable(
-            animation = tween(800,  easing = LinearOutSlowInEasing),
+            animation = tween(800, easing = LinearOutSlowInEasing),
             repeatMode = RepeatMode.Reverse
         )
     )
 
-    Column(
-        modifier = Modifier.border(2.dp, gold.copy(alpha)),
-        horizontalAlignment = if (isLeftSide) Alignment.End else Alignment.Start
+    Row(
+        modifier = Modifier
+            .border(2.dp, gold.copy(alpha), MaterialTheme.shapes.small)
+            .padding(3.dp),
+        verticalAlignment = Alignment.Bottom
     ) {
-        SizeOption(icon, sizeSelected == 1, 1f, sizeCounter.size1, isLeftSide) {
-            onSelected(1)
-        }
-        SizeOption(icon, sizeSelected == 2, 1.3f, sizeCounter.size2, isLeftSide) {
-            onSelected(2)
-        }
-        SizeOption(icon, sizeSelected == 3, 1.6f, sizeCounter.size3, isLeftSide) {
-            onSelected(3)
+        if (!isLeft) {
+            SizeOption(icon, sizeSelected == 3, 1.6f, sizeCounter.size3) { onSelected(3) }
+            SizeOption(icon, sizeSelected == 2, 1.3f, sizeCounter.size2) { onSelected(2) }
+            SizeOption(icon, sizeSelected == 1, 1f, sizeCounter.size1) { onSelected(1) }
+        } else {
+            SizeOption(icon, sizeSelected == 1, 1f, sizeCounter.size1) { onSelected(1) }
+            SizeOption(icon, sizeSelected == 2, 1.3f, sizeCounter.size2) { onSelected(2) }
+            SizeOption(icon, sizeSelected == 3, 1.6f, sizeCounter.size3) { onSelected(3) }
         }
     }
 }
 
 @Composable
-private fun ColumnScope.SizeOption(@DrawableRes image: Int, isSelected: Boolean, weight: Float, quantity: Int, isEnd: Boolean = false, onClick: () -> Unit) {
-    Row(
+private fun RowScope.SizeOption(@DrawableRes image: Int, isSelected: Boolean, weight: Float, quantity: Int, onClick: () -> Unit) {
+    Column(
         modifier = Modifier
             .weight(weight)
             .padding(top = 4.dp)
             .clickableSingle(ripple = false) { if (quantity > 0) onClick() },
-        verticalAlignment = Alignment.CenterVertically
+        horizontalAlignment = CenterHorizontally
     ) {
-        if (!isEnd)
-            Box(Modifier.fillMaxWidth(.3f)) {
-                Image(
-                    modifier = Modifier
-                        .fillMaxHeight()
-                        .align(Center)
-                        .aspectRatio(1f),
-                    painter = painterResource(image),
-                    contentDescription = null,
-                )
-            }
-
-//        if(isEnd && isSelected){
-//            Image(
-//                painter = painterResource(R.drawable.ic_arrow_drop),
-//                contentDescription = null,
-//            )
-//        }
+        Image(
+            modifier = Modifier.aspectRatio(1f),
+            painter = painterResource(image),
+            contentDescription = null,
+        )
 
         Text(
-            text = if (quantity == 99) "\u221e" else if (isEnd) "$quantity X" else "X $quantity",
+            text = if (quantity == 99) "\u221e" else "$quantity",
             style = MaterialTheme.typography.bodyMedium,
             color = if (isSelected) gold else Color.White,
             fontWeight = FontWeight.SemiBold,
             textAlign = TextAlign.Center
         )
-
-//        if(!isEnd && isSelected){
-//            Image(
-//                painter = painterResource(R.drawable.ic_arrow_drop),
-//                contentDescription = null,
-//            )
-//        }
-
-        if (isEnd)
-            Box(Modifier.fillMaxWidth(.3f)) {
-                Image(
-                    modifier = Modifier
-                        .fillMaxHeight()
-                        .align(Center)
-                        .aspectRatio(1f),
-                    painter = painterResource(image),
-                    contentDescription = null,
-                )
-            }
     }
 }
 
 @Composable
-private fun MyTutorialDialog( iconType:Int, onClose: () -> Unit) {
+private fun MyTutorialDialog(gameIcon: Int, onClose: () -> Unit) {
     MyDialog {
         Box(Modifier.border(2.dp, Color.White.copy(.3f), MaterialTheme.shapes.small)) {
             Column(
@@ -265,7 +233,7 @@ private fun MyTutorialDialog( iconType:Int, onClose: () -> Unit) {
                     textAlign = TextAlign.Center
                 )
 
-                val icon = painterResource(iconType.getIcon(true))
+                val icon = painterResource(gameIcon.getIcon(true))
 
                 Row(verticalAlignment = Alignment.Bottom) {
                     Image(
