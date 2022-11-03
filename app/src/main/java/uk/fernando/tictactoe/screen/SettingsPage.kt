@@ -146,8 +146,8 @@ private fun CustomSettingsResourcesCard(
                     onCheckedChange = onCheckedChange,
                     colors = SwitchDefaults.colors(
                         checkedThumbColor = Color.White,
-                        uncheckedBorderColor = Color.Transparent,
                         uncheckedThumbColor = Color.White,
+                        uncheckedTrackColor = Color.Gray
                     )
                 )
             else if (showArrow)
