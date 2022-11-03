@@ -16,6 +16,7 @@ import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.Center
@@ -35,9 +36,11 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import org.koin.androidx.compose.getViewModel
+import org.koin.androidx.compose.inject
 import uk.fernando.tictactoe.R
 import uk.fernando.tictactoe.component.NavigationTopBar
 import uk.fernando.tictactoe.component.WinConditionIcon
+import uk.fernando.tictactoe.datastore.PrefsStore
 import uk.fernando.tictactoe.enum.CellResult
 import uk.fernando.tictactoe.enum.GameIcon
 import uk.fernando.tictactoe.ext.getEndOffset
@@ -197,6 +200,8 @@ fun BottomSheetEndRound(viewModel: TicGameViewModel, onClose: () -> Unit) {
 
 @Composable
 fun Board(modifier: Modifier, viewModel: TicGameViewModel, boardSize: Int, gameIcon: Int, onSizeNoSelected: () -> Unit = {}) {
+    val prefs: PrefsStore by inject()
+    val isSoundEnable = prefs.isSoundEnabled().collectAsState(initial = true)
     val audio = MediaPlayer.create(LocalContext.current, R.raw.sound_finish)
     val audioWrong = MediaPlayer.create(LocalContext.current, R.raw.bip)
 
@@ -207,8 +212,8 @@ fun Board(modifier: Modifier, viewModel: TicGameViewModel, boardSize: Int, gameI
             itemsIndexed(viewModel.gamePosition) { index, position ->
                 GameCell(position, boardSize, gameIcon) {
                     when (viewModel.setCellValue(index)) {
-                        CellResult.END_GAME -> audio.playAudio()
-                        CellResult.ERROR -> audioWrong.playAudio()
+                        CellResult.END_GAME -> audio.playAudio(isSoundEnable.value)
+                        CellResult.ERROR -> audioWrong.playAudio(isSoundEnable.value)
                         CellResult.SIZE_NOT_SELECTED -> onSizeNoSelected()
                         else -> {}
                     }
