@@ -8,6 +8,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion.BottomCenter
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -55,50 +56,55 @@ fun CreateGamePage(
             }
         )
 
-        Column(
-            modifier = Modifier
-                .padding(horizontal = 16.dp)
-                .weight(1f)
-                .verticalScroll(rememberScrollState())
-        ) {
-            Spacer(Modifier.height(20.dp))
+        Box {
+            Column(
+                modifier = Modifier
+                    .padding(horizontal = 16.dp)
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+            ) {
+                Spacer(Modifier.height(20.dp))
 
-            BoardSize(viewModel)
+                BoardSize(viewModel)
 
-            MyDivider()
-
-            WinCondition(viewModel, gameType)
-
-            MyDivider()
-
-            if (gameType == 2) {
-                IconChoice(viewModel)
                 MyDivider()
+
+                WinCondition(viewModel, gameType)
+
+                MyDivider()
+
+                if (gameType == 2) {
+                    IconChoice(viewModel)
+                    MyDivider()
+                }
+
+                Rounds(viewModel)
+
+                MyDivider()
+
+                GameType(viewModel)
+
+                MyDivider()
+
+                Box(Modifier.padding(bottom = 16.dp)) {
+                    AIDifficulty(viewModel)
+                    Player2Name(viewModel)
+                }
+
+                Spacer(Modifier.height(66.dp))
             }
 
-            Rounds(viewModel)
-
-            MyDivider()
-
-            GameType(viewModel)
-
-            MyDivider()
-
-            Box(Modifier.padding(bottom = 16.dp)) {
-                AIDifficulty(viewModel)
-                Player2Name(viewModel)
-            }
+            MyButton(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+                    .align(BottomCenter)
+                    .defaultMinSize(minHeight = 50.dp),
+                text = stringResource(R.string.start_action).uppercase(),
+                color = greenLight,
+                onClick = { navController.safeNav(Directions.game.withArgs("${viewModel.boardSize.value}", "${viewModel.winCondition.value}", "$gameType", "${viewModel.iconType.value}")) }
+            )
         }
-
-        MyButton(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 16.dp, bottom = 16.dp, end = 16.dp)
-                .defaultMinSize(minHeight = 50.dp),
-            text = stringResource(R.string.start_action).uppercase(),
-            color = greenLight,
-            onClick = { navController.safeNav(Directions.game.withArgs("${viewModel.boardSize.value}", "${viewModel.winCondition.value}", "$gameType", "${viewModel.iconType.value}")) }
-        )
     }
 }
 
