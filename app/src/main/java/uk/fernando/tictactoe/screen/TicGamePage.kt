@@ -30,12 +30,12 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import org.koin.androidx.compose.getViewModel
 import uk.fernando.tictactoe.R
-import uk.fernando.tictactoe.component.NavigationTopBar
 import uk.fernando.tictactoe.component.WinConditionIcon
 import uk.fernando.tictactoe.enum.CellResult
 import uk.fernando.tictactoe.enum.GameIcon
@@ -79,7 +79,7 @@ fun TicGamePage(
         Column(Modifier.fillMaxSize()) {
 
             GameTopBar(
-                gameType = 1,
+                viewModel = viewModel,
                 onClose = { navController.popBackStack() }
             )
 
@@ -88,15 +88,13 @@ fun TicGamePage(
                 horizontalAlignment = CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-                WinConditionIcon(winCondition, 1)
+                WinConditionIcon(winCondition, GameIcon.CLASSIC.value)
 
-                Board(viewModel, boardSize, GameIcon.CLASSIC.value)
-
-                Text(
-                    text = stringResource(R.string.current_round, viewModel.currentRound.value, viewModel.rounds.value),
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onBackground,
-                    fontWeight = FontWeight.SemiBold
+                Board(
+                    modifier = Modifier.padding(vertical = 30.dp),
+                    viewModel = viewModel,
+                    boardSize = boardSize,
+                    gameIcon = GameIcon.CLASSIC.value
                 )
             }
 
@@ -107,27 +105,38 @@ fun TicGamePage(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun GameTopBar(gameType: Int, onClose: () -> Unit) {
-    NavigationTopBar(
-        gameType = gameType,
-        rightIcon = {
-            Card(
-                modifier = Modifier
-                    .align(Alignment.CenterEnd)
-                    .padding(end = 8.dp),
-                onClick = onClose,
-                shape = CircleShape,
-                elevation = CardDefaults.cardElevation(4.dp),
-                colors = CardDefaults.cardColors(Color.White),
-            ) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_close),
-                    modifier = Modifier.padding(8.dp),
-                    contentDescription = null,
-                    tint = Color.Black.copy(.7f)
-                )
-            }
-        })
+fun GameTopBar(viewModel: TicGameViewModel, onClose: () -> Unit) {
+    Box(
+        Modifier
+            .fillMaxWidth()
+            .padding(vertical = 5.dp)
+    ) {
+
+        Text(
+            modifier = Modifier.align(Center),
+            text = stringResource(R.string.current_round, viewModel.currentRound.value, viewModel.rounds.value),
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onBackground,
+            fontWeight = FontWeight.SemiBold
+        )
+
+        Card(
+            modifier = Modifier
+                .align(Alignment.CenterEnd)
+                .padding(end = 8.dp),
+            onClick = onClose,
+            shape = CircleShape,
+            elevation = CardDefaults.cardElevation(4.dp),
+            colors = CardDefaults.cardColors(Color.White),
+        ) {
+            Icon(
+                painter = painterResource(R.drawable.ic_close),
+                modifier = Modifier.padding(8.dp),
+                contentDescription = null,
+                tint = Color.Black.copy(.7f)
+            )
+        }
+    }
 }
 
 @Composable
@@ -196,14 +205,12 @@ fun BottomSheetEndRound(viewModel: TicGameViewModel, onClose: () -> Unit) {
 }
 
 @Composable
-fun Board(viewModel: TicGameViewModel, boardSize: Int, gameIcon: Int, onSizeNoSelected: () -> Unit = {}) {
+fun Board(modifier: Modifier, viewModel: TicGameViewModel, boardSize: Int, gameIcon: Int, onSizeNoSelected: () -> Unit = {}) {
     val audio = MediaPlayer.create(LocalContext.current, R.raw.sound_finish)
     val audioWrong = MediaPlayer.create(LocalContext.current, R.raw.bip)
 
     LazyVerticalGrid(
-        modifier = Modifier
-            .fillMaxWidth(.8f)
-            .padding(vertical = 15.dp),
+        modifier = modifier.fillMaxWidth(.8f),
         columns = GridCells.Fixed(boardSize),
         content = {
             itemsIndexed(viewModel.gamePosition) { index, position ->
@@ -274,7 +281,8 @@ fun BottomBar(viewModel: TicGameViewModel, gameIcon: Int) {
                     PLayerName(
                         modifier = Modifier.align(Alignment.CenterStart),
                         icon = gameIcon.getIcon(false),
-                        name = viewModel.player2.value.name
+                        name = viewModel.player2.value.name,
+                        isLeft = true
                     )
                 }
             }
@@ -329,27 +337,38 @@ private fun BottomBarAvatar(avatar: Int, isPlayerTurn: Boolean) {
 }
 
 @Composable
-private fun PLayerName(modifier: Modifier, @DrawableRes icon: Int, name: String) {
-    Column(
+private fun PLayerName(modifier: Modifier, @DrawableRes icon: Int, name: String, isLeft: Boolean = false) {
+    Row(
         modifier = modifier
-            .fillMaxWidth(0.5f)
+            .fillMaxWidth(0.7f)
             .padding(horizontal = 10.dp)
             .padding(top = 3.dp),
-        horizontalAlignment = CenterHorizontally
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center
     ) {
-        Image(
-            modifier = Modifier.size(24.dp),
-            painter = painterResource(icon),
-            contentDescription = null,
-        )
+        if (isLeft)
+            Image(
+                modifier = Modifier.size(24.dp),
+                painter = painterResource(icon),
+                contentDescription = null,
+            )
         Text(
-            modifier = Modifier.padding(top = 5.dp),
+            modifier = Modifier
+                .weight(1f)
+                .padding(horizontal = 3.dp),
             text = name,
+            overflow = TextOverflow.Ellipsis,
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onBackground,
             fontWeight = FontWeight.SemiBold,
             textAlign = TextAlign.Center
         )
+        if (!isLeft)
+            Image(
+                modifier = Modifier.size(24.dp),
+                painter = painterResource(icon),
+                contentDescription = null,
+            )
     }
 }
 

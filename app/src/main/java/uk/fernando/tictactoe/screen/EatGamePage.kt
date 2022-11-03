@@ -15,6 +15,7 @@ import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -50,6 +51,7 @@ fun EatGamePage(
 
     val prefs: PrefsStore by inject()
     val showTutorial = prefs.showTutorial().collectAsState(initial = false)
+    val isSmallScreen = LocalConfiguration.current.screenHeightDp < 700
 
     val (highlightSize, setHighlightSize) = remember { mutableStateOf(false) }
 
@@ -71,7 +73,7 @@ fun EatGamePage(
             Column(Modifier.fillMaxSize()) {
 
                 GameTopBar(
-                    gameType = 2,
+                    viewModel = viewModel,
                     onClose = { navController.popBackStack() }
                 )
 
@@ -83,17 +85,11 @@ fun EatGamePage(
                     WinConditionIcon(winCondition, gameIcon)
 
                     Board(
+                        modifier = Modifier.padding(vertical = if(!isSmallScreen) 30.dp else 5.dp),
                         viewModel = viewModel,
                         boardSize = boardSize,
                         gameIcon = gameIcon,
                         onSizeNoSelected = { setHighlightSize(true) }
-                    )
-
-                    Text(
-                        text = stringResource(R.string.current_round, viewModel.currentRound.value, viewModel.rounds.value),
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onBackground,
-                        fontWeight = FontWeight.SemiBold
                     )
 
                     ItemSizeCount(
@@ -136,7 +132,7 @@ private fun ItemSizeCount(viewModel: EatGameViewModel, gameIcon: Int, highlight:
             )
         }
 
-        Spacer(Modifier.weight(.7f))
+        Spacer(Modifier.weight(1f))
 
         Column(
             modifier = Modifier.weight(1f),
@@ -166,7 +162,7 @@ private fun SizeColumn(@DrawableRes icon: Int, sizeCounter: SizeModel, sizeSelec
 
     Row(
         modifier = Modifier
-            .border(2.dp, gold.copy(alpha), MaterialTheme.shapes.small)
+            .border(2.dp,if(!highlight) Color.Transparent else gold.copy(alpha), MaterialTheme.shapes.small)
             .padding(3.dp),
         verticalAlignment = Alignment.Bottom
     ) {

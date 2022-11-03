@@ -147,7 +147,7 @@ private fun WinCondition(viewModel: CreateGameViewModel, gameType: Int) {
 
     WinConditionIcon(
         winCondition = viewModel.winCondition.value,
-        iconType = if (gameType == 1) GameIcon.CLASSIC.value else viewModel.iconType.value
+        gameIcon = if (gameType == 1) GameIcon.CLASSIC.value else viewModel.iconType.value
     )
 }
 
@@ -290,7 +290,7 @@ private fun MyChip(text: String? = null, icon: Int? = null, isSelected: Boolean,
                 modifier = Modifier
                     .align(CenterHorizontally)
                     .padding(horizontal = 24.dp, vertical = 3.dp)
-                    .size(32.dp),
+                    .size(24.dp),
                 painter = painterResource(icon),
                 contentDescription = null
             )
