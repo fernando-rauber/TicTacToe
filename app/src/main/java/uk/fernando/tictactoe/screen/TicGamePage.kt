@@ -38,6 +38,7 @@ import androidx.navigation.NavController
 import org.koin.androidx.compose.getViewModel
 import org.koin.androidx.compose.inject
 import uk.fernando.tictactoe.R
+import uk.fernando.tictactoe.component.MyAvatarWithCrown
 import uk.fernando.tictactoe.component.NavigationTopBar
 import uk.fernando.tictactoe.component.WinConditionIcon
 import uk.fernando.tictactoe.datastore.PrefsStore
@@ -47,8 +48,10 @@ import uk.fernando.tictactoe.ext.getEndOffset
 import uk.fernando.tictactoe.ext.getIcon
 import uk.fernando.tictactoe.ext.getStartOffset
 import uk.fernando.tictactoe.model.CellModel
+import uk.fernando.tictactoe.model.Player
 import uk.fernando.tictactoe.theme.dark
 import uk.fernando.tictactoe.theme.greenLight
+import uk.fernando.tictactoe.util.GameResult
 import uk.fernando.tictactoe.viewmodel.TicGameViewModel
 import uk.fernando.util.component.MyButton
 import uk.fernando.util.ext.clickableSingle
@@ -65,7 +68,7 @@ fun TicGamePage(
 ) {
 
     val sheetState = rememberModalBottomSheetState(
-        initialValue = if (viewModel.playerWinner.value != null) ModalBottomSheetValue.Expanded else ModalBottomSheetValue.Hidden,
+        initialValue = if (viewModel.roundResult.value != null) ModalBottomSheetValue.Expanded else ModalBottomSheetValue.Hidden,
         confirmStateChange = { it != ModalBottomSheetValue.HalfExpanded }
     )
 
@@ -142,47 +145,43 @@ fun BottomSheetEndRound(viewModel: TicGameViewModel, onClose: () -> Unit) {
     ) {
         Column(Modifier.padding(16.dp)) {
 
-            viewModel.playerWinner.value?.let { playerWinner ->
+            viewModel.roundResult.value?.let { roundResult ->
 
-                val isEndGame = playerWinner.score >= ceil(viewModel.rounds.value / 2f)
+                var isDraw = false
+                var playerWinner = Player(1, "")
+
+                when (roundResult) {
+                    is GameResult.Winner -> playerWinner = roundResult.result
+                    is GameResult.Draw -> {
+                        playerWinner = viewModel.player1.value
+                        isDraw = true
+                    }
+                    else -> {}
+                }
+
+
+                var isEndGame = playerWinner.score >= ceil(viewModel.rounds.value / 2f)
+                if(!isEndGame && viewModel.currentRound.value == viewModel.rounds.value){
+                    isEndGame = true
+                }
 
                 Row(verticalAlignment = Alignment.CenterVertically) {
 
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth(.3f)
-                            .padding(top = 15.dp)
-                    ) {
-                        Icon(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .aspectRatio(1f),
-                            painter = painterResource(playerWinner.avatar),
-                            contentDescription = null,
-                            tint = Color.Unspecified
-                        )
-                        Icon(
-                            modifier = Modifier
-                                .fillMaxWidth(.45f)
-                                .aspectRatio(1f)
-                                .align(TopCenter)
-                                .offset(y = (-25).dp),
-                            painter = painterResource(R.drawable.ic_crown),
-                            contentDescription = null,
-                            tint = Color.Unspecified
-                        )
-                    }
+                    MyAvatarWithCrown(playerWinner, !isDraw)
 
                     Text(
                         modifier = Modifier
-                            .fillMaxWidth()
+                            .weight(1f)
                             .padding(horizontal = 30.dp),
-                        text = stringResource(if (isEndGame) R.string.player_win else R.string.player_win_round, playerWinner.name),
+                        text = stringResource(if(isDraw) R.string.draw else if (isEndGame) R.string.player_win else R.string.player_win_round, playerWinner.name),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onBackground,
                         fontWeight = FontWeight.SemiBold,
                         textAlign = TextAlign.Center
                     )
+
+                    if (isDraw)
+                        MyAvatarWithCrown(viewModel.player2.value, false)
                 }
 
                 MyButton(

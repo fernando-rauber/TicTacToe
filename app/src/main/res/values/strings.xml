@@ -49,5 +49,6 @@
     <string name="sound_subtext">Enable sound effects</string>
     <string name="privacy_policy">Privacy Policy</string>
     <string name="version">Version %s</string>
+    <string name="draw">Draw</string>
 
 </resources>

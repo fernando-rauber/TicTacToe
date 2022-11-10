@@ -10,6 +10,7 @@ import uk.fernando.tictactoe.model.CellModel
 import uk.fernando.tictactoe.model.Counter
 import uk.fernando.tictactoe.model.Player
 import uk.fernando.tictactoe.usecase.GameUseCase
+import uk.fernando.tictactoe.util.GameResult
 
 open class TicGameViewModel(private val prefsStore: GamePrefsStore, private val useCase: GameUseCase) : BaseViewModel() {
 
@@ -19,7 +20,7 @@ open class TicGameViewModel(private val prefsStore: GamePrefsStore, private val 
     val currentRound = mutableStateOf(1)
     val player1 = mutableStateOf(Player(getRandomAvatar(), "You"))
     val player2 = mutableStateOf(Player(getRandomAvatar(player1.value.avatar), ""))
-    val playerWinner = mutableStateOf<Player?>(null)
+    val roundResult = mutableStateOf<GameResult<Player>?>(null)
     val isPLayer1Turn = mutableStateOf(true)
 
     protected val _gamePosition = mutableStateListOf<CellModel>()
@@ -43,11 +44,11 @@ open class TicGameViewModel(private val prefsStore: GamePrefsStore, private val 
     }
 
     open fun setCellValue(position: Int): CellResult {
-        playerWinner.value?.let {
+        roundResult.value?.let {
             launchDefault {
-                playerWinner.value = null
+                roundResult.value = null
                 delay(100)
-                playerWinner.value = it
+                roundResult.value = it
             }
             return CellResult.DO_NOTHING
         }
@@ -62,19 +63,28 @@ open class TicGameViewModel(private val prefsStore: GamePrefsStore, private val 
 
             isPLayer1Turn.value = !isPLayer1Turn.value // Next Player
 
-            useCase.validateBoard(_gamePosition, winCondition)?.let {
-                playerWinner.value = if (it.isX!!) {
-                    player1.value.score++
-                    player1.value
-                } else {
-                    player2.value.score++
-                    player2.value
-                }
+            when (val gameResult = useCase.validateBoard(_gamePosition, winCondition)) {
+                is GameResult.Winner -> {
+                    val playerWinner = if (gameResult.result.isX!!) {
+                        player1.value.score++
+                        player1.value
+                    } else {
+                        player2.value.score++
+                        player2.value
+                    }
 
-                updateWinnerCells(it)
-                return CellResult.END_GAME
+                    roundResult.value = GameResult.Winner(playerWinner)
+
+                    updateWinnerCells(gameResult.result)
+                    return CellResult.END_GAME
+                }
+                is GameResult.Draw -> {
+                    roundResult.value = GameResult.Draw()
+                    return CellResult.DO_NOTHING
+                }
+                else -> return CellResult.DO_NOTHING
             }
-            return CellResult.DO_NOTHING
+
         }
         return CellResult.ERROR
     }
@@ -95,6 +105,6 @@ open class TicGameViewModel(private val prefsStore: GamePrefsStore, private val 
         }
 
         currentRound.value++
-        playerWinner.value = null
+        roundResult.value = null
     }
 }

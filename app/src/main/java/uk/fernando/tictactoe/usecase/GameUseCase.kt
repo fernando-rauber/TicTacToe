@@ -4,12 +4,13 @@ import uk.fernando.logger.MyLogger
 import uk.fernando.tictactoe.enum.WinnerDirection
 import uk.fernando.tictactoe.model.CellModel
 import uk.fernando.tictactoe.model.Counter
+import uk.fernando.tictactoe.util.GameResult
 import uk.fernando.util.ext.TAG
 import kotlin.math.sqrt
 
 class GameUseCase(private val logger: MyLogger) {
 
-    fun createCards(boardSize: Int) : List<CellModel> {
+    fun createCards(boardSize: Int): List<CellModel> {
         val boardSizeTotal = boardSize * boardSize
 
         val list = mutableListOf<CellModel>()
@@ -23,10 +24,10 @@ class GameUseCase(private val logger: MyLogger) {
             )
         }
 
-       return list
+        return list
     }
 
-    fun validateBoard(list: List<CellModel>, winCondition: Int): Counter? {
+    fun validateBoard(list: List<CellModel>, winCondition: Int): GameResult<Counter> {
         kotlin.runCatching {
             val boardSize = sqrt(list.size.toDouble()).toInt()
 
@@ -38,7 +39,7 @@ class GameUseCase(private val logger: MyLogger) {
                     counter = validateCell(cell.isX, counter, index)
 
                     if (counter.counter == winCondition) // Winner
-                        return counter
+                        return GameResult.Winner(counter)
                 }
 
                 // reset counter - Horizontal
@@ -54,10 +55,10 @@ class GameUseCase(private val logger: MyLogger) {
             logger.addMessageToCrashlytics(TAG, "Error on validating board: msg: ${it.message}")
             logger.addExceptionToCrashlytics(it)
         }
-        return null
+        return GameResult.Nothing()
     }
 
-    private fun validateBoardVertical(list: List<CellModel>, winCondition: Int): Counter? {
+    private fun validateBoardVertical(list: List<CellModel>, winCondition: Int): GameResult<Counter> {
         val boardSize = sqrt(list.size.toDouble()).toInt()
 
         val map = mutableMapOf<Int, Counter>()
@@ -75,7 +76,7 @@ class GameUseCase(private val logger: MyLogger) {
                     counter.increaseCounter(index)
 
                 if (counter.counter == winCondition)
-                    return counter
+                    return GameResult.Winner(counter)
 
                 map[(index + 1) % boardSize] = counter
             }
@@ -84,7 +85,7 @@ class GameUseCase(private val logger: MyLogger) {
         return validateTopStartTopEnd(list, winCondition)
     }
 
-    private fun validateTopStartTopEnd(list: List<CellModel>, winCondition: Int): Counter? {
+    private fun validateTopStartTopEnd(list: List<CellModel>, winCondition: Int): GameResult<Counter> {
         val boardSize = sqrt(list.size.toDouble()).toInt()
 
         val max = boardSize - winCondition
@@ -106,7 +107,7 @@ class GameUseCase(private val logger: MyLogger) {
                         map[indexCounter] = validateCell(cell.isX, counter, index)
 
                         if (map[indexCounter]?.counter == winCondition)
-                            return counter
+                            return GameResult.Winner(counter)
                     }
                 }
             }
@@ -118,7 +119,7 @@ class GameUseCase(private val logger: MyLogger) {
         return validateTopEndTopStart(list, winCondition)
     }
 
-    private fun validateTopEndTopStart(list: List<CellModel>, winCondition: Int): Counter? {
+    private fun validateTopEndTopStart(list: List<CellModel>, winCondition: Int): GameResult<Counter> {
         val boardSize = sqrt(list.size.toDouble()).toInt()
 
         val map = mutableMapOf<Int, Counter>()
@@ -141,7 +142,7 @@ class GameUseCase(private val logger: MyLogger) {
                         map[indexCounter] = validateCell(cell.isX, counter, index)
 
                         if (map[indexCounter]?.counter == winCondition)
-                            return counter
+                            return GameResult.Winner(counter)
                     }
                 }
             }
@@ -150,7 +151,7 @@ class GameUseCase(private val logger: MyLogger) {
         return validateTopStartBottomStart(list, winCondition)
     }
 
-    private fun validateTopStartBottomStart(list: List<CellModel>, winCondition: Int): Counter? {
+    private fun validateTopStartBottomStart(list: List<CellModel>, winCondition: Int): GameResult<Counter> {
         val boardSize = sqrt(list.size.toDouble()).toInt()
 
         val map = mutableMapOf<Int, Counter>()
@@ -178,7 +179,7 @@ class GameUseCase(private val logger: MyLogger) {
                                 map[indexCounter] = validateCell(cell.isX, diagonal, index)
 
                                 if (map[indexCounter]?.counter == winCondition)
-                                    return diagonal
+                                    return GameResult.Winner(diagonal)
                             }
                         }
                     }
@@ -196,7 +197,7 @@ class GameUseCase(private val logger: MyLogger) {
         return validateTopEndBottomEnd(list, winCondition)
     }
 
-    private fun validateTopEndBottomEnd(list: List<CellModel>, winCondition: Int): Counter? {
+    private fun validateTopEndBottomEnd(list: List<CellModel>, winCondition: Int): GameResult<Counter> {
         val boardSize = sqrt(list.size.toDouble()).toInt()
 
         val map = mutableMapOf<Int, Counter>()
@@ -224,7 +225,7 @@ class GameUseCase(private val logger: MyLogger) {
                                 map[indexCounter] = validateCell(cell.isX, diagonal, index)
 
                                 if (map[indexCounter]?.counter == winCondition)
-                                    return diagonal
+                                    return GameResult.Winner(diagonal)
                             }
                         }
                     }
@@ -238,7 +239,14 @@ class GameUseCase(private val logger: MyLogger) {
             nextRow++
         }
 
-        return null
+        return validateIfDraw(list)
+    }
+
+    private fun validateIfDraw(list: List<CellModel>): GameResult<Counter> {
+        if (list.firstOrNull { it.isX == null } == null)
+            return GameResult.Draw()
+
+        return GameResult.Nothing()
     }
 }
 

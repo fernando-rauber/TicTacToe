@@ -57,7 +57,7 @@ fun EatGamePage(
 
     ModalBottomSheetLayout(
         sheetState = rememberModalBottomSheetState(
-            initialValue = if (viewModel.playerWinner.value != null) ModalBottomSheetValue.Expanded else ModalBottomSheetValue.Hidden,
+            initialValue = if (viewModel.roundResult.value != null) ModalBottomSheetValue.Expanded else ModalBottomSheetValue.Hidden,
             confirmStateChange = { it != ModalBottomSheetValue.HalfExpanded }
         ),
         sheetContent = {
