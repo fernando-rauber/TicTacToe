@@ -62,7 +62,7 @@ fun SettingsPage(navController: NavController = NavController(LocalContext.curre
                 CustomSettingsResourcesCard(
                     modifierRow = Modifier
                         .clickableSingle {
-                            val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://funmath-5c418.web.app/memory-privacy-policy.html"))
+                            val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://funmath-5c418.web.app/privacy-policy.html"))
                             context.startActivity(browserIntent)
                         },
                     text = R.string.privacy_policy,
