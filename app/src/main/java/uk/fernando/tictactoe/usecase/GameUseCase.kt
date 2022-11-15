@@ -95,6 +95,9 @@ class GameUseCase(private val logger: MyLogger) {
 
         list.forEachIndexed { index, cell ->
 
+            if (index >= boardSize * row)
+                row += 1
+
             if (index <= max) {
                 map[index] = Counter(WinnerDirection.START_TOP_END_BOTTOM).apply { firstValue(cell.isX, index) }
             } else if (row > 1) {
@@ -112,8 +115,6 @@ class GameUseCase(private val logger: MyLogger) {
                 }
             }
 
-            if (index >= boardSize * row)
-                row += 1
         }
 
         return validateTopEndTopStart(list, winCondition)
@@ -126,6 +127,7 @@ class GameUseCase(private val logger: MyLogger) {
         var row = 1
 
         list.forEachIndexed { index, cell ->
+
             if (index >= boardSize * row)
                 row += 1
 
@@ -165,6 +167,11 @@ class GameUseCase(private val logger: MyLogger) {
 
             list.forEachIndexed { index, cell ->
 
+                if (index >= boardSize * row) {
+                    row++
+                    rowSupporter++
+                }
+
                 if (index >= (boardSize * nextRow) - 1) {
 
                     if (index % boardSize == 0) {
@@ -182,11 +189,6 @@ class GameUseCase(private val logger: MyLogger) {
                                     return GameResult.Winner(diagonal)
                             }
                         }
-                    }
-
-                    if (index >= boardSize * row) {
-                        row++
-                        rowSupporter++
                     }
                 }
             }
@@ -211,6 +213,11 @@ class GameUseCase(private val logger: MyLogger) {
 
             list.forEachIndexed { index, cell ->
 
+                if (index >= boardSize * row) {
+                    row++
+                    rowSupporter++
+                }
+
                 if (index >= (boardSize * nextRow) - 1) {
 
                     if (index % boardSize == (boardSize - 1)) {
@@ -230,10 +237,6 @@ class GameUseCase(private val logger: MyLogger) {
                         }
                     }
 
-                    if (index >= boardSize * row) {
-                        row++
-                        rowSupporter++
-                    }
                 }
             }
             nextRow++
