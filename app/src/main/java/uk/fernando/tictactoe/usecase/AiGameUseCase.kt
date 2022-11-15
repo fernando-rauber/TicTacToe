@@ -1,17 +1,14 @@
 package uk.fernando.tictactoe.usecase
 
 import uk.fernando.logger.MyLogger
-import uk.fernando.tictactoe.enum.WinnerDirection
 import uk.fernando.tictactoe.model.CellModel
-import uk.fernando.tictactoe.model.Counter
-import uk.fernando.tictactoe.util.GameResult
 import uk.fernando.util.ext.TAG
 import kotlin.math.sqrt
 
 class AiGameUseCase(private val logger: MyLogger) {
 
     fun aiTurn(list: List<CellModel>, winCondition: Int): Int {
-        return checkVertical(list, winCondition)
+        return checkHorizontal(list, winCondition)
     }
 
     private fun checkHorizontal(list: List<CellModel>, winCondition: Int): Int {
@@ -19,12 +16,6 @@ class AiGameUseCase(private val logger: MyLogger) {
             val boardSize = sqrt(list.size.toDouble()).toInt()
 
             var counter = AiCounter()
-
-            // - | - | - | - | -
-            // O | O | x | - | -
-            // - | - | x | - | -
-            // - | - | - | - | -
-            // - | - | - | - | -
 
             list.forEachIndexed { index, cell ->
 
@@ -41,7 +32,7 @@ class AiGameUseCase(private val logger: MyLogger) {
                     counter.reset()
             }
 
-            return checkHorizontal(list, winCondition - 1)
+            return checkVertical(list, winCondition)
         }.onFailure {
             logger.e(TAG, it.message.toString())
             logger.addMessageToCrashlytics(TAG, "Error on validating board: msg: ${it.message}")
@@ -74,7 +65,187 @@ class AiGameUseCase(private val logger: MyLogger) {
             map[(index + 1) % boardSize] = counter
         }
 
-        return checkVertical(list, winCondition - 1)
+        return validateTopStartTopEnd(list, winCondition)
+    }
+
+    private fun validateTopStartTopEnd(list: List<CellModel>, winCondition: Int): Int {
+        val boardSize = sqrt(list.size.toDouble()).toInt()
+
+        val max = boardSize - winCondition
+        val map = mutableMapOf<Int, AiCounter>()
+
+        var row = 0
+
+        list.forEachIndexed { index, cell ->
+
+            if (index >= boardSize * row)
+                row += 1
+
+            if (index <= max) {
+                map[index] = validateCell(cell.isX, AiCounter(), index)
+            } else if (row > 1) {
+                kotlin.runCatching {
+                    val indexCounter = index - (((row - 1) * boardSize) + row - 1)
+
+                    var counter = map[indexCounter]
+
+                    if (counter != null) {
+
+                        if (counter.counter == (winCondition - 1) && cell.isX == null) // after empty cell
+                            return index
+
+                        counter = validateCell(cell.isX, counter, index)
+
+                        if (counter.counter == (winCondition - 1) && counter.index != null) // before empty cell
+                            return counter.index!!
+
+                        map[indexCounter] = counter
+                    }
+                }
+            }
+        }
+
+        return validateTopEndTopStart(list, winCondition)
+    }
+
+    private fun validateTopEndTopStart(list: List<CellModel>, winCondition: Int): Int {
+        val boardSize = sqrt(list.size.toDouble()).toInt()
+
+        val map = mutableMapOf<Int, AiCounter>()
+        var row = 1
+
+        list.forEachIndexed { index, cell ->
+
+            if (index >= boardSize * row)
+                row += 1
+
+            if (index in (winCondition - 1) until boardSize) {
+                map[index] = validateCell(cell.isX, AiCounter(), index)
+            } else if (row > 1) {
+                kotlin.runCatching {
+
+                    val indexCounter = index - (((row - 1) * boardSize) - (row - 1))
+
+                    var counter = map[indexCounter]
+
+                    if (counter != null) {
+                        if (counter.counter == (winCondition - 1) && cell.isX == null) // after empty cell
+                            return index
+
+                        counter = validateCell(cell.isX, counter, index)
+
+                        if (counter.counter == (winCondition - 1) && counter.index != null) // before empty cell
+                            return counter.index!!
+
+                        map[indexCounter] = counter
+                    }
+                }
+            }
+        }
+
+        return validateTopStartBottomStart(list, winCondition)
+    }
+
+    private fun validateTopStartBottomStart(list: List<CellModel>, winCondition: Int): Int {
+        val boardSize = sqrt(list.size.toDouble()).toInt()
+
+        val map = mutableMapOf<Int, AiCounter>()
+
+        var nextRow = 1
+
+        while (nextRow <= boardSize) {
+
+            var row = nextRow
+            var rowSupporter = 0
+
+            list.forEachIndexed { index, cell ->
+
+                if (index >= boardSize * row) {
+                    row++
+                    rowSupporter++
+                }
+
+                if (index >= (boardSize * nextRow) - 1) {
+
+                    if (index % boardSize == 0) {
+                        map[index] = validateCell(cell.isX, AiCounter(), index)
+                    } else {
+                        kotlin.runCatching {
+
+                            val indexCounter = index - ((boardSize + 1) * rowSupporter)
+                            var counter = map[indexCounter]
+
+                            if (counter != null) {
+                                if (counter.counter == (winCondition - 1) && cell.isX == null) // after empty cell
+                                    return index
+
+                                counter = validateCell(cell.isX, counter, index)
+
+                                if (counter.counter == (winCondition - 1) && counter.index != null) // before empty cell
+                                    return counter.index!!
+
+                                map[indexCounter] = counter
+                            }
+                        }
+                    }
+                }
+            }
+
+            nextRow++
+        }
+
+        return validateTopEndBottomEnd(list, winCondition)
+    }
+
+    private fun validateTopEndBottomEnd(list: List<CellModel>, winCondition: Int): Int {
+        val boardSize = sqrt(list.size.toDouble()).toInt()
+
+        val map = mutableMapOf<Int, AiCounter>()
+
+        var nextRow = 2
+
+        while (nextRow <= boardSize) {
+
+            var row = nextRow
+            var rowSupporter = 0
+
+            list.forEachIndexed { index, cell ->
+
+                if (index >= boardSize * row) {
+                    row++
+                    rowSupporter++
+                }
+
+                if (index >= (boardSize * nextRow) - 1) {
+
+                    if (index % boardSize == (boardSize - 1)) {
+                        map[index] = validateCell(cell.isX, AiCounter(), index)
+                    } else {
+                        kotlin.runCatching {
+
+                            val indexCounter = index - ((boardSize - 1) * rowSupporter)
+                            var counter = map[indexCounter]
+
+                            if (counter != null) {
+                                if (counter.counter == (winCondition - 1) && cell.isX == null) // after empty cell
+                                    return index
+
+                                counter = validateCell(cell.isX, counter, index)
+
+                                if (counter.counter == (winCondition - 1) && counter.index != null) // before empty cell
+                                    return counter.index!!
+
+                                map[indexCounter] = counter
+                            }
+                        }
+                    }
+
+                }
+            }
+            nextRow++
+        }
+
+        return checkHorizontal(list, winCondition - 1)
     }
 
     private fun validateCell(isX: Boolean?, counter: AiCounter, index: Int): AiCounter {
