@@ -8,10 +8,24 @@ import kotlin.math.sqrt
 class AiGameUseCase(private val logger: MyLogger) {
 
     fun aiTurn(list: List<CellModel>, winCondition: Int): Int {
-        return checkHorizontal(list, winCondition)
+
+        // Check if AI can win
+        val resultWin = checkHorizontal(list, winCondition, false)
+        if (resultWin >= 0) return resultWin
+
+        // Block next player move
+        var condition = winCondition
+
+        while (condition >= 0) {
+            val resultBlock = checkHorizontal(list, condition, true)
+            if (resultBlock > 0) return resultBlock
+            condition--
+        }
+
+        return 0
     }
 
-    private fun checkHorizontal(list: List<CellModel>, winCondition: Int): Int {
+    private fun checkHorizontal(list: List<CellModel>, winCondition: Int, isXPlayer: Boolean): Int {
         kotlin.runCatching {
             val boardSize = sqrt(list.size.toDouble()).toInt()
 
@@ -22,7 +36,7 @@ class AiGameUseCase(private val logger: MyLogger) {
                 if (counter.counter == (winCondition - 1) && cell.isX == null) // after empty cell
                     return index
 
-                counter = validateCell(cell.isX, counter, index)
+                counter = validateCell(cell.isX, counter, index, isXPlayer)
 
                 if (counter.counter == (winCondition - 1) && counter.index != null) // before empty cell
                     return counter.index!!
@@ -32,16 +46,16 @@ class AiGameUseCase(private val logger: MyLogger) {
                     counter.reset()
             }
 
-            return checkVertical(list, winCondition)
+            return checkVertical(list, winCondition, isXPlayer)
         }.onFailure {
             logger.e(TAG, it.message.toString())
             logger.addMessageToCrashlytics(TAG, "Error on validating board: msg: ${it.message}")
             logger.addExceptionToCrashlytics(it)
         }
-        return 1
+        return -1
     }
 
-    private fun checkVertical(list: List<CellModel>, winCondition: Int): Int {
+    private fun checkVertical(list: List<CellModel>, winCondition: Int, isXPlayer: Boolean): Int {
         val boardSize = sqrt(list.size.toDouble()).toInt()
 
         val map = mutableMapOf<Int, AiCounter>()
@@ -56,7 +70,7 @@ class AiGameUseCase(private val logger: MyLogger) {
             if (counter.counter == (winCondition - 1) && cell.isX == null) // after empty cell
                 return index
 
-            counter = validateCell(cell.isX, counter, index)
+            counter = validateCell(cell.isX, counter, index, isXPlayer)
 
             if (counter.counter == (winCondition - 1) && counter.index != null) // before empty cell
                 return counter.index!!
@@ -65,10 +79,10 @@ class AiGameUseCase(private val logger: MyLogger) {
             map[(index + 1) % boardSize] = counter
         }
 
-        return validateTopStartTopEnd(list, winCondition)
+        return validateTopStartTopEnd(list, winCondition, isXPlayer)
     }
 
-    private fun validateTopStartTopEnd(list: List<CellModel>, winCondition: Int): Int {
+    private fun validateTopStartTopEnd(list: List<CellModel>, winCondition: Int, isXPlayer: Boolean): Int {
         val boardSize = sqrt(list.size.toDouble()).toInt()
 
         val max = boardSize - winCondition
@@ -82,7 +96,7 @@ class AiGameUseCase(private val logger: MyLogger) {
                 row += 1
 
             if (index <= max) {
-                map[index] = validateCell(cell.isX, AiCounter(), index)
+                map[index] = validateCell(cell.isX, AiCounter(), index, isXPlayer)
             } else if (row > 1) {
                 kotlin.runCatching {
                     val indexCounter = index - (((row - 1) * boardSize) + row - 1)
@@ -94,7 +108,7 @@ class AiGameUseCase(private val logger: MyLogger) {
                         if (counter.counter == (winCondition - 1) && cell.isX == null) // after empty cell
                             return index
 
-                        counter = validateCell(cell.isX, counter, index)
+                        counter = validateCell(cell.isX, counter, index, isXPlayer)
 
                         if (counter.counter == (winCondition - 1) && counter.index != null) // before empty cell
                             return counter.index!!
@@ -105,10 +119,10 @@ class AiGameUseCase(private val logger: MyLogger) {
             }
         }
 
-        return validateTopEndTopStart(list, winCondition)
+        return validateTopEndTopStart(list, winCondition, isXPlayer)
     }
 
-    private fun validateTopEndTopStart(list: List<CellModel>, winCondition: Int): Int {
+    private fun validateTopEndTopStart(list: List<CellModel>, winCondition: Int, isXPlayer: Boolean): Int {
         val boardSize = sqrt(list.size.toDouble()).toInt()
 
         val map = mutableMapOf<Int, AiCounter>()
@@ -120,7 +134,7 @@ class AiGameUseCase(private val logger: MyLogger) {
                 row += 1
 
             if (index in (winCondition - 1) until boardSize) {
-                map[index] = validateCell(cell.isX, AiCounter(), index)
+                map[index] = validateCell(cell.isX, AiCounter(), index, isXPlayer)
             } else if (row > 1) {
                 kotlin.runCatching {
 
@@ -132,7 +146,7 @@ class AiGameUseCase(private val logger: MyLogger) {
                         if (counter.counter == (winCondition - 1) && cell.isX == null) // after empty cell
                             return index
 
-                        counter = validateCell(cell.isX, counter, index)
+                        counter = validateCell(cell.isX, counter, index, isXPlayer)
 
                         if (counter.counter == (winCondition - 1) && counter.index != null) // before empty cell
                             return counter.index!!
@@ -143,10 +157,10 @@ class AiGameUseCase(private val logger: MyLogger) {
             }
         }
 
-        return validateTopStartBottomStart(list, winCondition)
+        return validateTopStartBottomStart(list, winCondition, isXPlayer)
     }
 
-    private fun validateTopStartBottomStart(list: List<CellModel>, winCondition: Int): Int {
+    private fun validateTopStartBottomStart(list: List<CellModel>, winCondition: Int, isXPlayer: Boolean): Int {
         val boardSize = sqrt(list.size.toDouble()).toInt()
 
         val map = mutableMapOf<Int, AiCounter>()
@@ -168,7 +182,7 @@ class AiGameUseCase(private val logger: MyLogger) {
                 if (index >= (boardSize * nextRow) - 1) {
 
                     if (index % boardSize == 0) {
-                        map[index] = validateCell(cell.isX, AiCounter(), index)
+                        map[index] = validateCell(cell.isX, AiCounter(), index, isXPlayer)
                     } else {
                         kotlin.runCatching {
 
@@ -179,7 +193,7 @@ class AiGameUseCase(private val logger: MyLogger) {
                                 if (counter.counter == (winCondition - 1) && cell.isX == null) // after empty cell
                                     return index
 
-                                counter = validateCell(cell.isX, counter, index)
+                                counter = validateCell(cell.isX, counter, index, isXPlayer)
 
                                 if (counter.counter == (winCondition - 1) && counter.index != null) // before empty cell
                                     return counter.index!!
@@ -194,10 +208,10 @@ class AiGameUseCase(private val logger: MyLogger) {
             nextRow++
         }
 
-        return validateTopEndBottomEnd(list, winCondition)
+        return validateTopEndBottomEnd(list, winCondition, isXPlayer)
     }
 
-    private fun validateTopEndBottomEnd(list: List<CellModel>, winCondition: Int): Int {
+    private fun validateTopEndBottomEnd(list: List<CellModel>, winCondition: Int, isXPlayer: Boolean): Int {
         val boardSize = sqrt(list.size.toDouble()).toInt()
 
         val map = mutableMapOf<Int, AiCounter>()
@@ -219,7 +233,7 @@ class AiGameUseCase(private val logger: MyLogger) {
                 if (index >= (boardSize * nextRow) - 1) {
 
                     if (index % boardSize == (boardSize - 1)) {
-                        map[index] = validateCell(cell.isX, AiCounter(), index)
+                        map[index] = validateCell(cell.isX, AiCounter(), index, isXPlayer)
                     } else {
                         kotlin.runCatching {
 
@@ -230,7 +244,7 @@ class AiGameUseCase(private val logger: MyLogger) {
                                 if (counter.counter == (winCondition - 1) && cell.isX == null) // after empty cell
                                     return index
 
-                                counter = validateCell(cell.isX, counter, index)
+                                counter = validateCell(cell.isX, counter, index, isXPlayer)
 
                                 if (counter.counter == (winCondition - 1) && counter.index != null) // before empty cell
                                     return counter.index!!
@@ -245,11 +259,11 @@ class AiGameUseCase(private val logger: MyLogger) {
             nextRow++
         }
 
-        return checkHorizontal(list, winCondition - 1)
+        return -1
     }
 
-    private fun validateCell(isX: Boolean?, counter: AiCounter, index: Int): AiCounter {
-        if (isX == false)
+    private fun validateCell(isX: Boolean?, counter: AiCounter, index: Int, isXPlayer: Boolean): AiCounter {
+        if (isX == !isXPlayer)
             counter.reset()
         else if (isX == null) {
             counter.index = index
