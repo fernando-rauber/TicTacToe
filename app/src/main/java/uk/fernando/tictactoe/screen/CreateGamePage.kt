@@ -20,6 +20,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import org.koin.androidx.compose.getViewModel
+import uk.fernando.advertising.component.AdBanner
 import uk.fernando.tictactoe.R
 import uk.fernando.tictactoe.component.MyDivider
 import uk.fernando.tictactoe.component.MyTextField
@@ -41,7 +42,7 @@ fun CreateGamePage(
     viewModel: CreateGameViewModel = getViewModel()
 ) {
 
-    LaunchedEffect(Unit) { viewModel.setGameType(gameType) }
+    LaunchedEffect(Unit) { if (gameType == 2) viewModel.setGameType(2) }
 
     Column(modifier = Modifier.fillMaxSize()) {
 
@@ -58,53 +59,62 @@ fun CreateGamePage(
             }
         )
 
-        Box {
-            Column(
-                modifier = Modifier
-                    .padding(horizontal = 16.dp)
-                    .fillMaxSize()
-                    .verticalScroll(rememberScrollState())
-            ) {
-                Spacer(Modifier.height(20.dp))
+        Column {
+            Box(Modifier.weight(1f)) {
+                Column(
+                    modifier = Modifier
+                        .padding(horizontal = 16.dp)
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState())
+                ) {
+                    Spacer(Modifier.height(20.dp))
 
-                BoardSize(viewModel)
+                    BoardSize(viewModel)
 
-                MyDivider()
-
-                WinCondition(viewModel, gameType)
-
-                MyDivider()
-
-                if (gameType == 2) {
-                    IconChoice(viewModel)
                     MyDivider()
-                }
 
-                Rounds(viewModel)
+                    WinCondition(viewModel, gameType)
 
-                MyDivider()
-
-                if(gameType == 1) {
-                    GameType(viewModel)
                     MyDivider()
+
+                    if (gameType == 2) {
+                        IconChoice(viewModel)
+                        MyDivider()
+                    }
+
+                    Rounds(viewModel)
+
+                    MyDivider()
+
+                    if (gameType == 1) {
+                        GameType(viewModel)
+                        MyDivider()
+                    }
+
+                    Box(Modifier.padding(bottom = 16.dp)) {
+                        Player2Name(viewModel)
+                    }
+
+                    Spacer(Modifier.height(66.dp))
                 }
 
-                Box(Modifier.padding(bottom = 16.dp)) {
-                    Player2Name(viewModel)
-                }
-
-                Spacer(Modifier.height(66.dp))
+                MyButton(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                        .align(BottomCenter)
+                        .defaultMinSize(minHeight = 50.dp),
+                    text = stringResource(R.string.start_action).uppercase(),
+                    color = greenLight,
+                    onClick = { navController.safeNav(Directions.game.withArgs("${viewModel.boardSize.value}", "${viewModel.winCondition.value}", "$gameType", "${viewModel.iconType.value}")) }
+                )
             }
 
-            MyButton(
+            AdBanner(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-                    .align(BottomCenter)
-                    .defaultMinSize(minHeight = 50.dp),
-                text = stringResource(R.string.start_action).uppercase(),
-                color = greenLight,
-                onClick = { navController.safeNav(Directions.game.withArgs("${viewModel.boardSize.value}", "${viewModel.winCondition.value}", "$gameType", "${viewModel.iconType.value}")) }
+                    .defaultMinSize(minHeight = 50.dp)
+                    .align(CenterHorizontally),
+                unitId = R.string.ad_banner_create_game
             )
         }
     }

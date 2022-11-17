@@ -1,5 +1,9 @@
 <resources>
-    <string name="app_name">Tic Tac Toe</string>
+    <string name="app_name">Ultimate Tic Tac Toe</string>
+
+    <string name="ad_banner_home" translatable="false">ca-app-pub-5791754615168338/2601631156</string>
+    <string name="ad_banner_create_game" translatable="false">ca-app-pub-5791754615168338/9025824306</string>
+    <string name="ad_interstitial_end_game" translatable="false">ca-app-pub-5791754615168338/6349304477</string>
 
     <string name="tic">Tic</string>
     <string name="tac">Tac</string>

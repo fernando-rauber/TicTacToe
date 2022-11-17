@@ -39,7 +39,9 @@ import androidx.navigation.NavController
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.getViewModel
 import org.koin.androidx.compose.inject
+import uk.fernando.advertising.AdInterstitial
 import uk.fernando.tictactoe.R
+import uk.fernando.tictactoe.activity.MainActivity
 import uk.fernando.tictactoe.component.MyAvatarWithCrown
 import uk.fernando.tictactoe.component.NavigationTopBar
 import uk.fernando.tictactoe.component.WinConditionIcon
@@ -68,6 +70,7 @@ fun TicGamePage(
     winCondition: Int,
     viewModel: TicGameViewModel = getViewModel()
 ) {
+    val fullScreenAd = AdInterstitial(LocalContext.current as MainActivity, stringResource(R.string.ad_interstitial_end_game))
 
     val sheetState = rememberModalBottomSheetState(
         initialValue = if (viewModel.roundResult.value != null) ModalBottomSheetValue.Expanded else ModalBottomSheetValue.Hidden,
@@ -79,7 +82,10 @@ fun TicGamePage(
         sheetContent = {
             BottomSheetEndRound(
                 viewModel = viewModel,
-                onClose = { navController.popBackStack() }
+                onClose = {
+                    fullScreenAd.showAdvert()
+                    navController.popBackStack()
+                }
             )
         },
         sheetBackgroundColor = Color.Transparent,
@@ -89,7 +95,10 @@ fun TicGamePage(
 
             GameTopBar(
                 viewModel = viewModel,
-                onClose = { navController.popBackStack() }
+                onClose = {
+                    fullScreenAd.showAdvert()
+                    navController.popBackStack()
+                }
             )
 
             Column(

@@ -26,7 +26,9 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import org.koin.androidx.compose.getViewModel
 import org.koin.androidx.compose.inject
+import uk.fernando.advertising.AdInterstitial
 import uk.fernando.tictactoe.R
+import uk.fernando.tictactoe.activity.MainActivity
 import uk.fernando.tictactoe.component.MyDivider
 import uk.fernando.tictactoe.component.WinConditionIcon
 import uk.fernando.tictactoe.datastore.PrefsStore
@@ -50,6 +52,7 @@ fun EatGamePage(
 ) {
 
     val prefs: PrefsStore by inject()
+    val fullScreenAd = AdInterstitial(LocalContext.current as MainActivity, stringResource(R.string.ad_interstitial_end_game))
     val showTutorial = prefs.showTutorial().collectAsState(initial = false)
     val isSmallScreen = LocalConfiguration.current.screenHeightDp < 700
 
@@ -63,7 +66,10 @@ fun EatGamePage(
         sheetContent = {
             BottomSheetEndRound(
                 viewModel = viewModel,
-                onClose = { navController.popBackStack() }
+                onClose = {
+                    fullScreenAd.showAdvert()
+                    navController.popBackStack()
+                }
             )
         },
         sheetBackgroundColor = Color.Transparent,
@@ -74,7 +80,10 @@ fun EatGamePage(
 
                 GameTopBar(
                     viewModel = viewModel,
-                    onClose = { navController.popBackStack() }
+                    onClose = {
+                        fullScreenAd.showAdvert()
+                        navController.popBackStack()
+                    }
                 )
 
                 Column(
@@ -85,7 +94,7 @@ fun EatGamePage(
                     WinConditionIcon(winCondition, gameIcon)
 
                     Board(
-                        modifier = Modifier.padding(vertical = if(!isSmallScreen) 30.dp else 5.dp),
+                        modifier = Modifier.padding(vertical = if (!isSmallScreen) 30.dp else 5.dp),
                         viewModel = viewModel,
                         boardSize = boardSize,
                         gameIcon = gameIcon,
@@ -162,7 +171,7 @@ private fun SizeColumn(@DrawableRes icon: Int, sizeCounter: SizeModel, sizeSelec
 
     Row(
         modifier = Modifier
-            .border(2.dp,if(!highlight) Color.Transparent else gold.copy(alpha), MaterialTheme.shapes.small)
+            .border(2.dp, if (!highlight) Color.Transparent else gold.copy(alpha), MaterialTheme.shapes.small)
             .padding(3.dp),
         verticalAlignment = Alignment.Bottom
     ) {

@@ -5,6 +5,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion.BottomCenter
+import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -12,6 +14,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import uk.fernando.advertising.component.AdBanner
 import uk.fernando.tictactoe.R
 import uk.fernando.tictactoe.component.NavigationTopBar
 import uk.fernando.tictactoe.navigation.Directions
@@ -39,7 +42,7 @@ fun HomePage(navController: NavController = NavController(LocalContext.current))
 
         Column(
             modifier = Modifier
-                .fillMaxSize()
+                .align(Center)
                 .padding(16.dp),
             horizontalAlignment = CenterHorizontally,
             verticalArrangement = Arrangement.Center
@@ -70,5 +73,12 @@ fun HomePage(navController: NavController = NavController(LocalContext.current))
                 onClick = { navController.safeNav(Directions.createGame.withArgs("2")) }
             )
         }
+
+        AdBanner(
+            modifier = Modifier
+                .align(BottomCenter)
+                .padding(bottom = 8.dp),
+            unitId = R.string.ad_banner_home
+        )
     }
 }

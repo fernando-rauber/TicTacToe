@@ -58,7 +58,7 @@ android {
 
 dependencies {
 
-//    implementation 'com.github.fernando-rauber.mylibrary:advertising:1.4.5'
+    implementation 'com.github.fernando-rauber.mylibrary:advertising:1.4.5'
     implementation 'com.github.fernando-rauber.mylibrary:logger:1.4.4'
     implementation 'com.github.fernando-rauber.mylibrary:util:1.4.4'
 
