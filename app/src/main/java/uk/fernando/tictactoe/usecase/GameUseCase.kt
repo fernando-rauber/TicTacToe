@@ -18,6 +18,7 @@ class GameUseCase(private val logger: MyLogger) {
         for (position in 0 until boardSizeTotal) {
             list.add(
                 CellModel(
+                    position = position,
                     showBarLeft = position % boardSize < boardSize - 1,
                     showBarBottom = position < (boardSizeTotal - boardSize)
                 )

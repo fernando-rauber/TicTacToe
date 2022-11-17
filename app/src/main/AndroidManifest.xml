@@ -17,7 +17,9 @@
         <activity
             android:name=".activity.MainActivity"
             android:exported="true"
-            android:theme="@style/Theme.TicTacToe">
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.TicTacToe"
+            tools:ignore="LockedOrientationActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

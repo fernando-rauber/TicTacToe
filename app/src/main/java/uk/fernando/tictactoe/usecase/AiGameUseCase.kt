@@ -496,7 +496,7 @@ private fun checkBetweenEmptyCells(list: List<CellModel>, winCondition: Int, isX
                 counter = 0
             } else if (it.isX == null) {
                 if (counter > 0)
-                    emptyIndex = it.id
+                    emptyIndex = it.position
             } else if (it.isX == isXPlayer)
                 counter++
 

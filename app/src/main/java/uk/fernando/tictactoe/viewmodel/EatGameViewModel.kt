@@ -5,6 +5,7 @@ import uk.fernando.tictactoe.datastore.GamePrefsStore
 import uk.fernando.tictactoe.datastore.PrefsStore
 import uk.fernando.tictactoe.enum.CellResult
 import uk.fernando.tictactoe.model.SizeModel
+import uk.fernando.tictactoe.usecase.AiGameUseCase
 import uk.fernando.tictactoe.usecase.GameUseCase
 import uk.fernando.tictactoe.util.GameResult
 import kotlin.math.ceil
@@ -12,8 +13,9 @@ import kotlin.math.ceil
 class EatGameViewModel(
     private val gamePrefs: GamePrefsStore,
     private val prefsStore: PrefsStore,
-    private val useCase: GameUseCase
-) : TicGameViewModel(gamePrefs, useCase) {
+    private val useCase: GameUseCase,
+    aiUseCase: AiGameUseCase
+) : TicGameViewModel(gamePrefs, useCase, aiUseCase) {
 
     val imageSize = mutableStateOf<Int?>(null)
 

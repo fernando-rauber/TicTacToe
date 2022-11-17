@@ -9,12 +9,14 @@ import uk.fernando.tictactoe.ext.getRandomAvatar
 import uk.fernando.tictactoe.model.CellModel
 import uk.fernando.tictactoe.model.Counter
 import uk.fernando.tictactoe.model.Player
+import uk.fernando.tictactoe.usecase.AiGameUseCase
 import uk.fernando.tictactoe.usecase.GameUseCase
 import uk.fernando.tictactoe.util.GameResult
 
-open class TicGameViewModel(private val prefsStore: GamePrefsStore, private val useCase: GameUseCase) : BaseViewModel() {
+open class TicGameViewModel(private val prefsStore: GamePrefsStore, private val useCase: GameUseCase, private val aiUseCase: AiGameUseCase) : BaseViewModel() {
 
     var winCondition = 3
+    var isAiOn = false
 
     val rounds = mutableStateOf(3)
     val currentRound = mutableStateOf(1)
@@ -32,7 +34,7 @@ open class TicGameViewModel(private val prefsStore: GamePrefsStore, private val 
             rounds.value = prefsStore.getRounds()
 
             if (prefsStore.getGameType() == 1) { // Single player
-                //difficulty.value = prefsStore.getDifficulty()
+                isAiOn = true
                 player2.value = player2.value.copy(name = "AI")
             } else { // Multiplayer
                 val player2Name = prefsStore.getPLayer2Name()
@@ -44,6 +46,9 @@ open class TicGameViewModel(private val prefsStore: GamePrefsStore, private val 
     }
 
     open fun setCellValue(position: Int): CellResult {
+        if (isAiOn && !isPLayer1Turn.value)
+            return CellResult.DO_NOTHING
+
         roundResult.value?.let {
             launchDefault {
                 roundResult.value = null
@@ -53,7 +58,13 @@ open class TicGameViewModel(private val prefsStore: GamePrefsStore, private val 
             return CellResult.DO_NOTHING
         }
 
-        return insertValueCellTicTacToe(position)
+        return when (val result = insertValueCellTicTacToe(position)) {
+            CellResult.AI_TURN -> {
+                val index = aiUseCase.aiTurn(_gamePosition, winCondition)
+                insertValueCellTicTacToe(index)
+            }
+            else -> result
+        }
     }
 
     open fun insertValueCellTicTacToe(position: Int): CellResult {
@@ -82,7 +93,12 @@ open class TicGameViewModel(private val prefsStore: GamePrefsStore, private val 
                     roundResult.value = GameResult.Draw()
                     return CellResult.DO_NOTHING
                 }
-                else -> return CellResult.DO_NOTHING
+                else -> {
+                    return if (isAiOn && !isPLayer1Turn.value)
+                        CellResult.AI_TURN
+                    else
+                        CellResult.DO_NOTHING
+                }
             }
 
         }
@@ -106,5 +122,10 @@ open class TicGameViewModel(private val prefsStore: GamePrefsStore, private val 
 
         currentRound.value++
         roundResult.value = null
+
+        if(!isPLayer1Turn.value){
+            val index = aiUseCase.aiTurn(_gamePosition, winCondition)
+            insertValueCellTicTacToe(index)
+        }
     }
 }
