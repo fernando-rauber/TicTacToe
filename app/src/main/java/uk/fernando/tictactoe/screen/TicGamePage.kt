@@ -18,6 +18,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
@@ -35,6 +36,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import kotlinx.coroutines.launch
 import org.koin.androidx.compose.getViewModel
 import org.koin.androidx.compose.inject
 import uk.fernando.tictactoe.R
@@ -161,7 +163,7 @@ fun BottomSheetEndRound(viewModel: TicGameViewModel, onClose: () -> Unit) {
 
 
                 var isEndGame = playerWinner.score >= ceil(viewModel.rounds.value / 2f)
-                if(!isEndGame && viewModel.currentRound.value == viewModel.rounds.value){
+                if (!isEndGame && viewModel.currentRound.value == viewModel.rounds.value) {
                     isEndGame = true
                 }
 
@@ -173,7 +175,7 @@ fun BottomSheetEndRound(viewModel: TicGameViewModel, onClose: () -> Unit) {
                         modifier = Modifier
                             .weight(1f)
                             .padding(horizontal = 30.dp),
-                        text = stringResource(if(isDraw) R.string.draw else if (isEndGame) R.string.player_win else R.string.player_win_round, playerWinner.name),
+                        text = stringResource(if (isDraw) R.string.draw else if (isEndGame) R.string.player_win else R.string.player_win_round, playerWinner.name),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onBackground,
                         fontWeight = FontWeight.SemiBold,
@@ -203,6 +205,7 @@ fun Board(modifier: Modifier, viewModel: TicGameViewModel, boardSize: Int, gameI
     val isSoundEnable = prefs.isSoundEnabled().collectAsState(initial = true)
     val audio = MediaPlayer.create(LocalContext.current, R.raw.sound_finish)
     val audioWrong = MediaPlayer.create(LocalContext.current, R.raw.bip)
+    val coroutine = rememberCoroutineScope()
 
     LazyVerticalGrid(
         modifier = modifier.fillMaxWidth(.8f),
@@ -210,11 +213,13 @@ fun Board(modifier: Modifier, viewModel: TicGameViewModel, boardSize: Int, gameI
         content = {
             itemsIndexed(viewModel.gamePosition) { index, position ->
                 GameCell(position, boardSize, gameIcon) {
-                    when (viewModel.setCellValue(index)) {
-                        CellResult.END_GAME -> audio.playAudio(isSoundEnable.value)
-                        CellResult.ERROR -> audioWrong.playAudio(isSoundEnable.value)
-                        CellResult.SIZE_NOT_SELECTED -> onSizeNoSelected()
-                        else -> {}
+                    coroutine.launch {
+                        when (viewModel.setCellValue(index)) {
+                            CellResult.END_GAME -> audio.playAudio(isSoundEnable.value)
+                            CellResult.ERROR -> audioWrong.playAudio(isSoundEnable.value)
+                            CellResult.SIZE_NOT_SELECTED -> onSizeNoSelected()
+                            else -> {}
+                        }
                     }
                 }
             }

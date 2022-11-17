@@ -3,6 +3,8 @@ package uk.fernando.tictactoe.viewmodel
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flow
 import uk.fernando.tictactoe.datastore.GamePrefsStore
 import uk.fernando.tictactoe.enum.CellResult
 import uk.fernando.tictactoe.ext.getRandomAvatar
@@ -45,7 +47,7 @@ open class TicGameViewModel(private val prefsStore: GamePrefsStore, private val 
         }
     }
 
-    open fun setCellValue(position: Int): CellResult {
+    open suspend fun setCellValue(position: Int): CellResult {
         if (isAiOn && !isPLayer1Turn.value)
             return CellResult.DO_NOTHING
 
@@ -59,12 +61,15 @@ open class TicGameViewModel(private val prefsStore: GamePrefsStore, private val 
         }
 
         return when (val result = insertValueCellTicTacToe(position)) {
-            CellResult.AI_TURN -> {
-                val index = aiUseCase.aiTurn(_gamePosition, winCondition)
-                insertValueCellTicTacToe(index)
-            }
+            CellResult.AI_TURN -> computerTurn().first()
             else -> result
         }
+    }
+
+    private fun computerTurn() = flow {
+        val index = aiUseCase.aiTurn(_gamePosition, winCondition)
+        delay(1000)
+        emit(insertValueCellTicTacToe(index))
     }
 
     open fun insertValueCellTicTacToe(position: Int): CellResult {
@@ -123,9 +128,7 @@ open class TicGameViewModel(private val prefsStore: GamePrefsStore, private val 
         currentRound.value++
         roundResult.value = null
 
-        if(!isPLayer1Turn.value){
-            val index = aiUseCase.aiTurn(_gamePosition, winCondition)
-            insertValueCellTicTacToe(index)
-        }
+        if (!isPLayer1Turn.value)
+            computerTurn()
     }
 }
