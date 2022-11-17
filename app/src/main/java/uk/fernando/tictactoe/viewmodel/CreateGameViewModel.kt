@@ -11,7 +11,6 @@ class CreateGameViewModel(private val prefsStore: GamePrefsStore) : BaseViewMode
     val rounds = mutableStateOf(3)
     val iconType = mutableStateOf(1)
     val gameType = mutableStateOf(1)
-    val difficulty = mutableStateOf(1)
     val playerName = mutableStateOf("Player 2")
 
     private val _winConditionList = mutableStateListOf<Int>()
@@ -24,7 +23,6 @@ class CreateGameViewModel(private val prefsStore: GamePrefsStore) : BaseViewMode
             rounds.value = prefsStore.getRounds()
             iconType.value = prefsStore.getIconType()
             gameType.value = prefsStore.getGameType()
-            difficulty.value = prefsStore.getDifficulty()
             playerName.value = prefsStore.getPLayer2Name()
 
             updateWinConditionList(boardSize.value)
@@ -61,11 +59,6 @@ class CreateGameViewModel(private val prefsStore: GamePrefsStore) : BaseViewMode
     fun setGameType(value: Int) {
         gameType.value = value
         launchDefault { prefsStore.storeGameType(value) }
-    }
-
-    fun setDifficulty(value: Int) {
-        difficulty.value = value
-        launchDefault { prefsStore.storeDifficulty(value) }
     }
 
     fun setPlayerName(value: String) {

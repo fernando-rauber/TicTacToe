@@ -41,6 +41,8 @@ fun CreateGamePage(
     viewModel: CreateGameViewModel = getViewModel()
 ) {
 
+    LaunchedEffect(Unit) { viewModel.setGameType(gameType) }
+
     Column(modifier = Modifier.fillMaxSize()) {
 
         NavigationTopBar(
@@ -82,12 +84,12 @@ fun CreateGamePage(
 
                 MyDivider()
 
-                GameType(viewModel)
-
-                MyDivider()
+                if(gameType == 1) {
+                    GameType(viewModel)
+                    MyDivider()
+                }
 
                 Box(Modifier.padding(bottom = 16.dp)) {
-                    AIDifficulty(viewModel)
                     Player2Name(viewModel)
                 }
 
@@ -201,35 +203,6 @@ private fun GameType(viewModel: CreateGameViewModel) {
             isSelected = viewModel.gameType.value == 2,
             onClick = { viewModel.setGameType(2) }
         )
-    }
-}
-
-@Composable
-private fun AIDifficulty(viewModel: CreateGameViewModel) {
-    MyAnimatedVisibility(viewModel.gameType.value == 1) {
-
-        Column {
-            RowContent(title = R.string.difficulty) {
-                MyChip(
-                    text = stringResource(R.string.easy),
-                    isSelected = viewModel.difficulty.value == 1,
-                    color = greenLight,
-                    onClick = { viewModel.setDifficulty(1) }
-                )
-                MyChip(
-                    text = stringResource(R.string.medium),
-                    isSelected = viewModel.difficulty.value == 2,
-                    color = gold,
-                    onClick = { viewModel.setDifficulty(2) }
-                )
-                MyChip(
-                    text = stringResource(R.string.hard),
-                    isSelected = viewModel.difficulty.value == 3,
-                    color = red,
-                    onClick = { viewModel.setDifficulty(3) }
-                )
-            }
-        }
     }
 }
 

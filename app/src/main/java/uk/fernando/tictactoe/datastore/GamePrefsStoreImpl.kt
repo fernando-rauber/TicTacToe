@@ -38,10 +38,6 @@ class GamePrefsStoreImpl(context: Context) : GamePrefsStore {
         return dataStore.data.map { prefs -> prefs[PreferencesKeys.ICON_TYPE] ?: 2 }.first()
     }
 
-    override suspend fun getDifficulty(): Int {
-        return dataStore.data.map { prefs -> prefs[PreferencesKeys.DIFFICULTY] ?: 1 }.first()
-    }
-
     override suspend fun getPLayer2Name(): String {
         return dataStore.data.map { prefs -> prefs[PreferencesKeys.PLAYER2_NAME] ?: "Player 2" }.first()
     }
@@ -66,10 +62,6 @@ class GamePrefsStoreImpl(context: Context) : GamePrefsStore {
         dataStore.edit { prefs -> prefs[PreferencesKeys.ICON_TYPE] = value }
     }
 
-    override suspend fun storeDifficulty(value: Int) {
-        dataStore.edit { prefs -> prefs[PreferencesKeys.DIFFICULTY] = value }
-    }
-
     override suspend fun storePLayer2Name(value: String) {
         dataStore.edit { prefs -> prefs[PreferencesKeys.PLAYER2_NAME] = value }
     }
@@ -80,7 +72,6 @@ class GamePrefsStoreImpl(context: Context) : GamePrefsStore {
         val ROUNDS = intPreferencesKey("rounds")
         val GAME_TYPE = intPreferencesKey("game_type")
         val ICON_TYPE = intPreferencesKey("icon_type")
-        val DIFFICULTY = intPreferencesKey("difficulty")
         val PLAYER2_NAME = stringPreferencesKey("player2_name")
     }
 }

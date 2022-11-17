@@ -22,10 +22,6 @@
     <string name="single_player">Single Player</string>
     <string name="multiplayer">Multiplayer</string>
 
-    <string name="easy">Easy</string>
-    <string name="medium">Medium</string>
-    <string name="hard">Hard</string>
-
     <string name="start_action">Start</string>
 
     // Game
@@ -35,7 +31,7 @@
     <string name="player_win_round">%s won this round</string>
     <string name="player_win">%s won</string>
     <string name="close_action">Close</string>
-    <string name="player_name">Player name</string>
+    <string name="player_name">Opponent name</string>
 
     // Tutorial
     <string name="tutorial_title">How to play</string>
