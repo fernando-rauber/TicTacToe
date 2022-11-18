@@ -21,7 +21,6 @@
     <string name="rounds">Rounds</string>
     <string name="icon_choice">Icon</string>
     <string name="game_type">Game type</string>
-    <string name="difficulty">Difficulty</string>
 
     <string name="single_player">Single Player</string>
     <string name="multiplayer">Multiplayer</string>

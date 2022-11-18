@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Jogo da velha</string>
+
+    <string name="tic">Jogo</string>
+    <string name="tac">da</string>
+    <string name="toe">Velha</string>
+    <string name="eat">Engolir</string>
+
+    // Home
+    <string name="home_subtext">Elige tu juego</string>
+    <string name="classic_action">Clássico</string>
+    <string name="eat_action">Engolir da Velha</string>
+
+    // Create Game
+    <string name="board_size">Tamanho do tabuleiro</string>
+    <string name="win_condition">Condição de vitória</string>
+    <string name="rounds">Rodadas</string>
+    <string name="icon_choice">Ícone</string>
+    <string name="game_type">Tipo de jogo</string>
+
+    <string name="single_player">Único jogador</string>
+    <string name="multiplayer">Multijogador</string>
+
+    <string name="start_action">Começar</string>
+
+    // Game
+    <string name="score">%1$d "&#8195;" Pontuação "&#8195;"  %2$d</string>
+    <string name="current_round">Rodada %1$d - %2$d</string>
+    <string name="next_round_action">Próxima rodada</string>
+    <string name="player_win_round">%s ganhou esta rodada</string>
+    <string name="player_win">%s ganhou</string>
+    <string name="close_action">Fechar</string>
+    <string name="player_name">Nome do oponente</string>
+
+    // Tutorial
+    <string name="tutorial_title">Como jogar</string>
+    <string name="tutorial_1">Escolha o tamanho e coloque-o.</string>
+    <string name="tutorial_2">O tamanho maior come o tamanho menor.</string>
+    <string name="tutorial_3">Ganhe combinando a cor e não o tamanho.</string>
+
+    // Settings
+    <string name="settings_title">Configurações</string>
+    <string name="sound">Som ativado</string>
+    <string name="sound_subtext">Ativar efeitos sonoros</string>
+    <string name="privacy_policy">Política de Privacidade</string>
+    <string name="version">Versão %s</string>
+    <string name="draw">Empate</string>
+
+
+</resources>
