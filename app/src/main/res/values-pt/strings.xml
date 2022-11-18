@@ -1,17 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
-    <string name="app_name">Jogo da velha</string>
+    <string name="app_name">Jogo da Velha</string>
 
     <string name="tic">Jogo</string>
     <string name="tac">da</string>
     <string name="toe">Velha</string>
-    <string name="eat">Engolir</string>
+    <string name="eat">Devorar</string>
 
     // Home
     <string name="home_subtext">Elige tu juego</string>
     <string name="classic_action">Clássico</string>
-    <string name="eat_action">Engolir da Velha</string>
+    <string name="eat_action">Devorar da Velha</string>
 
     // Create Game
     <string name="board_size">Tamanho do tabuleiro</string>
@@ -47,6 +46,5 @@
     <string name="privacy_policy">Política de Privacidade</string>
     <string name="version">Versão %s</string>
     <string name="draw">Empate</string>
-
 
 </resources>

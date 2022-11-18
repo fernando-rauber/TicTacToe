@@ -10,7 +10,7 @@
     // Home
     <string name="home_subtext">Elige tu juego</string>
     <string name="classic_action">Clásico</string>
-    <string name="eat_action">Devorar da Velha</string>
+    <string name="eat_action">Devorar en Raya</string>
 
     // Create Game
     <string name="board_size">Tamaño del tablero</string>
