@@ -1,5 +1,6 @@
 package uk.fernando.tictactoe.viewmodel
 
+import android.util.Log
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import kotlinx.coroutines.delay
@@ -68,7 +69,8 @@ open class TicGameViewModel(private val prefsStore: GamePrefsStore, private val 
 
     private fun computerTurn() = flow {
         val index = aiUseCase.aiTurn(_gamePosition, winCondition)
-        delay(1000)
+        delay(800)
+        Log.e("*****", "computerTurn: $index ", )
         emit(insertValueCellTicTacToe(index))
     }
 
@@ -129,6 +131,6 @@ open class TicGameViewModel(private val prefsStore: GamePrefsStore, private val 
         roundResult.value = null
 
         if (!isPLayer1Turn.value)
-            computerTurn()
+            launchDefault { computerTurn().first() }
     }
 }

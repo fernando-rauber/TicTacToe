@@ -32,7 +32,7 @@ class AiGameUseCase(private val logger: MyLogger) {
 
             while (condition >= 0) {
                 val resultBlock = checkNextToBlock(list, condition, true)
-                if (resultBlock > 0) return resultBlock
+                if (resultBlock >= 0) return resultBlock
                 condition--
             }
 
