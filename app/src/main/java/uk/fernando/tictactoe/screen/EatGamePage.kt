@@ -54,7 +54,7 @@ fun EatGamePage(
     val prefs: PrefsStore by inject()
     val fullScreenAd = AdInterstitial(LocalContext.current as MainActivity, stringResource(R.string.ad_interstitial_end_game))
     val showTutorial = prefs.showTutorial().collectAsState(initial = false)
-    val isSmallScreen = LocalConfiguration.current.screenHeightDp < 700
+    val isSmallScreen = (LocalConfiguration.current.screenHeightDp / LocalConfiguration.current.screenWidthDp) < 1.7
 
     val (highlightSize, setHighlightSize) = remember { mutableStateOf(false) }
 
@@ -94,7 +94,9 @@ fun EatGamePage(
                     WinConditionIcon(winCondition, gameIcon)
 
                     Board(
-                        modifier = Modifier.padding(vertical = if (!isSmallScreen) 30.dp else 5.dp),
+                        modifier = Modifier
+                            .padding(vertical = if (isSmallScreen) 15.dp else 30.dp)
+                            .fillMaxWidth(if (isSmallScreen) .65f else .9f),
                         viewModel = viewModel,
                         boardSize = boardSize,
                         gameIcon = gameIcon,
