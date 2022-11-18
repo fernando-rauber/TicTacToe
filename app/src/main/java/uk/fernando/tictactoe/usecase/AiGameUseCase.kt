@@ -4,71 +4,85 @@ import uk.fernando.logger.MyLogger
 import uk.fernando.tictactoe.model.CellModel
 import uk.fernando.util.ext.TAG
 import kotlin.math.sqrt
+import kotlin.random.Random
 
 class AiGameUseCase(private val logger: MyLogger) {
 
     fun aiTurn(list: List<CellModel>, winCondition: Int): Int {
-
-        // AI WIN
-
-        // Check if AI can win
-        val resultWin = checkHorizontal(list, winCondition, false)
-        if (resultWin >= 0) return resultWin
-
-        // Check if AI can win between cells
-        val betweenWin = checkEmptyVerticalHorizontal(list, winCondition, false)
-        if (betweenWin >= 0) return betweenWin
-
-
-        // BLOCK PLAYER
-
-        // Check if can block player between cells
-        val betweenBlock = checkEmptyVerticalHorizontal(list, winCondition, true)
-        if (betweenBlock >= 0) return betweenBlock
-
-        // Block next player move
-        var condition = winCondition
-
-        while (condition >= 0) {
-            val resultBlock = checkHorizontal(list, condition, true)
-            if (resultBlock > 0) return resultBlock
-            condition--
-        }
-
-        return 0
-    }
-
-    private fun checkHorizontal(list: List<CellModel>, winCondition: Int, isXPlayer: Boolean): Int {
         kotlin.runCatching {
-            val boardSize = sqrt(list.size.toDouble()).toInt()
+            // AI WIN
 
-            var counter = AiCounter()
+            // Check if AI can win
+            val resultWin = checkNextToBlock(list, winCondition, false)
+            if (resultWin >= 0) return resultWin
 
-            list.forEachIndexed { index, cell ->
+            // Check if AI can win between cells
+            val betweenWin = checkEmptyVerticalHorizontal(list, winCondition, false)
+            if (betweenWin >= 0) return betweenWin
 
-                if (counter.counter == (winCondition - 1) && cell.isX == null) // after empty cell
-                    return index
 
-                counter = validateCell(cell.isX, counter, index, isXPlayer)
+            // BLOCK PLAYER
 
-                if (counter.counter == (winCondition - 1) && counter.index != null) // before empty cell
-                    return counter.index!!
+            // Check if can block player between cells
+            val betweenBlock = checkEmptyVerticalHorizontal(list, winCondition, true)
+            if (betweenBlock >= 0) return betweenBlock
 
-                // reset counter when ends row
-                if ((index + 1) % boardSize == 0)
-                    counter.reset()
+            // Block next player move
+            var condition = winCondition
+
+            while (condition >= 0) {
+                val resultBlock = checkNextToBlock(list, condition, true)
+                if (resultBlock > 0) return resultBlock
+                condition--
             }
 
-            return checkVertical(list, winCondition, isXPlayer)
         }.onFailure {
             logger.e(TAG, it.message.toString())
             logger.addMessageToCrashlytics(TAG, "Error on validating board: msg: ${it.message}")
             logger.addExceptionToCrashlytics(it)
         }
-        return -1
+        return 0
     }
 
-    private fun checkVertical(list: List<CellModel>, winCondition: Int, isXPlayer: Boolean): Int {
+    private fun checkNextToBlock(list: List<CellModel>, winCondition: Int, isXPlayer: Boolean): Int {
+        return when (val order = Random.nextInt(5)) {
+            0 -> checkHorizontal(list, winCondition, isXPlayer, order)
+            1 -> checkVertical(list, winCondition, isXPlayer, order)
+            2 -> validateTopStartTopEnd(list, winCondition, isXPlayer, order)
+            3 -> validateTopEndTopStart(list, winCondition, isXPlayer, order)
+            4 -> validateTopStartBottomStart(list, winCondition, isXPlayer, order)
+            else -> validateTopEndBottomEnd(list, winCondition, isXPlayer, order)
+        }
+    }
+
+    private fun checkHorizontal(list: List<CellModel>, winCondition: Int, isXPlayer: Boolean, order: Int): Int {
+
+        val boardSize = sqrt(list.size.toDouble()).toInt()
+
+        var counter = AiCounter()
+
+        list.forEachIndexed { index, cell ->
+
+            if (counter.counter == (winCondition - 1) && cell.isX == null) // after empty cell
+                return index
+
+            counter = validateCell(cell.isX, counter, index, isXPlayer)
+
+            if (counter.counter == (winCondition - 1) && counter.index != null) // before empty cell
+                return counter.index!!
+
+            // reset counter when ends row
+            if ((index + 1) % boardSize == 0)
+                counter.reset()
+        }
+
+        return when (order) {
+            1 -> -1
+            else -> checkVertical(list, winCondition, isXPlayer, order)
+        }
+    }
+
+    private fun checkVertical(list: List<CellModel>, winCondition: Int, isXPlayer: Boolean, order: Int): Int {
         val boardSize = sqrt(list.size.toDouble()).toInt()
 
         val map = mutableMapOf<Int, AiCounter>()
@@ -92,10 +106,13 @@ class AiGameUseCase(private val logger: MyLogger) {
             map[(index + 1) % boardSize] = counter
         }
 
-        return validateTopStartTopEnd(list, winCondition, isXPlayer)
+        return when (order) {
+            2 -> -1
+            else -> validateTopStartTopEnd(list, winCondition, isXPlayer, order)
+        }
     }
 
-    private fun validateTopStartTopEnd(list: List<CellModel>, winCondition: Int, isXPlayer: Boolean): Int {
+    private fun validateTopStartTopEnd(list: List<CellModel>, winCondition: Int, isXPlayer: Boolean, order: Int): Int {
         val boardSize = sqrt(list.size.toDouble()).toInt()
 
         val max = boardSize - winCondition
@@ -132,10 +149,13 @@ class AiGameUseCase(private val logger: MyLogger) {
             }
         }
 
-        return validateTopEndTopStart(list, winCondition, isXPlayer)
+        return when (order) {
+            3 -> -1
+            else -> validateTopEndTopStart(list, winCondition, isXPlayer, order)
+        }
     }
 
-    private fun validateTopEndTopStart(list: List<CellModel>, winCondition: Int, isXPlayer: Boolean): Int {
+    private fun validateTopEndTopStart(list: List<CellModel>, winCondition: Int, isXPlayer: Boolean, order: Int): Int {
         val boardSize = sqrt(list.size.toDouble()).toInt()
 
         val map = mutableMapOf<Int, AiCounter>()
@@ -170,10 +190,13 @@ class AiGameUseCase(private val logger: MyLogger) {
             }
         }
 
-        return validateTopStartBottomStart(list, winCondition, isXPlayer)
+        return when (order) {
+            4 -> -1
+            else -> validateTopStartBottomStart(list, winCondition, isXPlayer, order)
+        }
     }
 
-    private fun validateTopStartBottomStart(list: List<CellModel>, winCondition: Int, isXPlayer: Boolean): Int {
+    private fun validateTopStartBottomStart(list: List<CellModel>, winCondition: Int, isXPlayer: Boolean, order: Int): Int {
         val boardSize = sqrt(list.size.toDouble()).toInt()
 
         val map = mutableMapOf<Int, AiCounter>()
@@ -221,10 +244,13 @@ class AiGameUseCase(private val logger: MyLogger) {
             nextRow++
         }
 
-        return validateTopEndBottomEnd(list, winCondition, isXPlayer)
+        return when (order) {
+            5 -> -1
+            else -> validateTopEndBottomEnd(list, winCondition, isXPlayer, order)
+        }
     }
 
-    private fun validateTopEndBottomEnd(list: List<CellModel>, winCondition: Int, isXPlayer: Boolean): Int {
+    private fun validateTopEndBottomEnd(list: List<CellModel>, winCondition: Int, isXPlayer: Boolean, order: Int): Int {
         val boardSize = sqrt(list.size.toDouble()).toInt()
 
         val map = mutableMapOf<Int, AiCounter>()
@@ -272,7 +298,10 @@ class AiGameUseCase(private val logger: MyLogger) {
             nextRow++
         }
 
-        return -1
+        return when (order) {
+            0 -> -1
+            else -> checkHorizontal(list, winCondition, isXPlayer, order)
+        }
     }
 
     private fun validateCell(isX: Boolean?, counter: AiCounter, index: Int, isXPlayer: Boolean): AiCounter {
@@ -343,7 +372,7 @@ private fun checkBetweenTopStartTopEnd(list: List<CellModel>, winCondition: Int,
     list.forEachIndexed { index, cell ->
 
         if (index >= boardSize * row)
-            row ++
+            row++
 
         if (index <= max) {
             map[index] = mutableListOf()
@@ -355,7 +384,7 @@ private fun checkBetweenTopStartTopEnd(list: List<CellModel>, winCondition: Int,
                 if (map[indexCounter] != null) {
                     map[indexCounter]?.add(cell)
 
-                    if(row >= winCondition) {
+                    if (row >= winCondition) {
                         val emptyBetween = checkBetweenEmptyCells(map[indexCounter] ?: emptyList(), winCondition, isXPlayer)
                         if (emptyBetween >= 0) return emptyBetween
                     }
@@ -384,7 +413,7 @@ private fun checkBetweenTopStartTopEnd(list: List<CellModel>, winCondition: Int,
                 if (map[indexCounter] != null) {
                     map[indexCounter]?.add(cell)
 
-                    if(row >= winCondition) {
+                    if (row >= winCondition) {
                         val emptyBetween = checkBetweenEmptyCells(map[indexCounter] ?: emptyList(), winCondition, isXPlayer)
                         if (emptyBetween >= 0) return emptyBetween
                     }
@@ -426,7 +455,7 @@ private fun checkEmptyDiagonalBottom(list: List<CellModel>, winCondition: Int, i
                         if (map[indexCounter] != null) {
                             map[indexCounter]?.add(cell)
 
-                            if(row >= winCondition) {
+                            if (row >= winCondition) {
                                 val emptyBetween = checkBetweenEmptyCells(map[indexCounter] ?: emptyList(), winCondition, isXPlayer)
                                 if (emptyBetween >= 0) return emptyBetween
                             }
@@ -440,7 +469,7 @@ private fun checkEmptyDiagonalBottom(list: List<CellModel>, winCondition: Int, i
     }
 
     // check between TopEnd to BottomEnd
-   map.clear()
+    map.clear()
     nextRow = 2
 
     while (nextRow <= boardSize) {
@@ -468,7 +497,7 @@ private fun checkEmptyDiagonalBottom(list: List<CellModel>, winCondition: Int, i
                         if (map[indexCounter] != null) {
                             map[indexCounter]?.add(cell)
 
-                            if(row >= winCondition) {
+                            if (row >= winCondition) {
                                 val emptyBetween = checkBetweenEmptyCells(map[indexCounter] ?: emptyList(), winCondition, isXPlayer)
                                 if (emptyBetween >= 0) return emptyBetween
                             }
