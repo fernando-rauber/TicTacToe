@@ -2,6 +2,7 @@ package uk.fernando.tictactoe.screen
 
 import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -113,6 +114,8 @@ fun CreateGamePage(
             AdBanner(
                 modifier = Modifier
                     .defaultMinSize(minHeight = 50.dp)
+                    .fillMaxWidth()
+                    .background(Color.Black)
                     .align(CenterHorizontally),
                 unitId = R.string.ad_banner_create_game
             )
@@ -202,7 +205,12 @@ private fun IconChoice(viewModel: CreateGameViewModel) {
 
 @Composable
 private fun GameType(viewModel: CreateGameViewModel) {
-    RowContent(title = R.string.game_type) {
+    Text(
+        text = stringResource(R.string.game_type),
+        style = MaterialTheme.typography.bodyLarge,
+        color = MaterialTheme.colorScheme.onBackground
+    )
+    Column(Modifier.padding(top = 8.dp)) {
         MyChip(
             text = stringResource(R.string.single_player),
             isSelected = viewModel.gameType.value == 1,
