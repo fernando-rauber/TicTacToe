@@ -1,6 +1,5 @@
 package uk.fernando.tictactoe.viewmodel
 
-import android.util.Log
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import kotlinx.coroutines.delay
@@ -23,7 +22,7 @@ open class TicGameViewModel(private val prefsStore: GamePrefsStore, private val 
 
     val rounds = mutableStateOf(3)
     val currentRound = mutableStateOf(1)
-    val player1 = mutableStateOf(Player(getRandomAvatar(), "You"))
+    val player1 = mutableStateOf(Player(getRandomAvatar(), ""))
     val player2 = mutableStateOf(Player(getRandomAvatar(player1.value.avatar), ""))
     val roundResult = mutableStateOf<GameResult<Player>?>(null)
     val isPLayer1Turn = mutableStateOf(true)
@@ -70,7 +69,6 @@ open class TicGameViewModel(private val prefsStore: GamePrefsStore, private val 
     private fun computerTurn() = flow {
         val index = aiUseCase.aiTurn(_gamePosition, winCondition)
         delay(800)
-        Log.e("*****", "computerTurn: $index ", )
         emit(insertValueCellTicTacToe(index))
     }
 
@@ -136,7 +134,7 @@ open class TicGameViewModel(private val prefsStore: GamePrefsStore, private val 
             launchDefault { computerTurn().first() }
     }
 
-    open fun additionalWorkForEatTacToe(){
+    open fun additionalWorkForEatTacToe() {
 
     }
 }
