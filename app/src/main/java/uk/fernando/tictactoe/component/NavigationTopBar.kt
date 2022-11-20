@@ -60,7 +60,7 @@ fun NavigationTopBar(
                     }
                     append(" ")
                     withStyle(style = SpanStyle(gold)) {
-                        append(stringResource(R.string.tac))
+                        append(stringResource(if (gameType == 1) R.string.tac else R.string.eat_tac))
                     }
                     append(" ")
                     withStyle(style = SpanStyle(red)) {

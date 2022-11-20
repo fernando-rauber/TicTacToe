@@ -272,7 +272,7 @@ fun BottomBar(viewModel: TicGameViewModel, gameIcon: Int) {
                     PLayerName(
                         modifier = Modifier.align(Alignment.CenterEnd),
                         icon = gameIcon.getIcon(true),
-                        name = viewModel.player1.value.name
+                        name = stringResource(id = R.string.you)
                     )
                 }
 

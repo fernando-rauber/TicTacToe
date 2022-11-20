@@ -5,12 +5,14 @@
     <string name="tic">Jogo</string>
     <string name="tac">da</string>
     <string name="toe">Velha</string>
+
     <string name="eat">Devorar</string>
+    <string name="eat_tac">a</string>
 
     // Home
-    <string name="home_subtext">Elige tu juego</string>
+    <string name="home_subtext">Escolha seu jogo</string>
     <string name="classic_action">Clássico</string>
-    <string name="eat_action">Devorar da Velha</string>
+    <string name="eat_action">Devorar a Velha</string>
 
     // Create Game
     <string name="board_size">Tamanho do tabuleiro</string>
@@ -32,6 +34,7 @@
     <string name="player_win">%s ganhou</string>
     <string name="close_action">Fechar</string>
     <string name="player_name">Nome do oponente</string>
+    <string name="you">Você</string>
 
     // Tutorial
     <string name="tutorial_title">Como jogar</string>

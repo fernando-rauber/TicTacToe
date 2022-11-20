@@ -62,7 +62,8 @@ class CreateGameViewModel(private val prefsStore: GamePrefsStore) : BaseViewMode
     }
 
     fun setPlayerName(value: String) {
-        launchDefault { prefsStore.storePLayer2Name(value) }
+        val name = value.ifEmpty { "Player 2" }
+        launchDefault { prefsStore.storePLayer2Name(name) }
     }
 
     private fun updateWinConditionList(boardSize: Int) {

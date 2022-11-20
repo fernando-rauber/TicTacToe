@@ -18,13 +18,15 @@ class EatGameViewModel(
 ) : TicGameViewModel(gamePrefs, useCase, aiUseCase) {
 
     val imageSize = mutableStateOf<Int?>(null)
+    private var boardSize = 5
 
     val playerRed = mutableStateOf(SizeModel())
     val playerGreen = mutableStateOf(SizeModel())
 
     init {
         launchDefault {
-            setSizeQuantity(gamePrefs.getBoardSize())
+            boardSize = gamePrefs.getBoardSize()
+            setSizeQuantity(boardSize)
         }
     }
 
@@ -94,4 +96,9 @@ class EatGameViewModel(
         playerRed.value = playerRed.value.copy(size2 = boardSize, size3 = size3)
         playerGreen.value = playerGreen.value.copy(size2 = boardSize, size3 = size3)
     }
+
+    override fun additionalWorkForEatTacToe() {
+        setSizeQuantity(boardSize)
+    }
+
 }

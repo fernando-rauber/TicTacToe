@@ -130,7 +130,13 @@ open class TicGameViewModel(private val prefsStore: GamePrefsStore, private val 
         currentRound.value++
         roundResult.value = null
 
+        additionalWorkForEatTacToe()
+
         if (!isPLayer1Turn.value)
             launchDefault { computerTurn().first() }
+    }
+
+    open fun additionalWorkForEatTacToe(){
+
     }
 }

@@ -8,7 +8,9 @@
     <string name="tic">Tic</string>
     <string name="tac">Tac</string>
     <string name="toe">Toe</string>
+
     <string name="eat">Eat</string>
+    <string name="eat_tac">Tac</string>
 
     // Home
     <string name="home_subtext">Choose your game</string>
@@ -35,6 +37,7 @@
     <string name="player_win">%s won</string>
     <string name="close_action">Close</string>
     <string name="player_name">Opponent name</string>
+    <string name="you">You</string>
 
     // Tutorial
     <string name="tutorial_title">How to play</string>

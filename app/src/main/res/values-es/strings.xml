@@ -5,12 +5,14 @@
     <string name="tic">Tres</string>
     <string name="tac">en</string>
     <string name="toe">Raya</string>
+
     <string name="eat">Devorar</string>
+    <string name="eat_tac">la</string>
 
     // Home
     <string name="home_subtext">Elige tu juego</string>
     <string name="classic_action">Clásico</string>
-    <string name="eat_action">Devorar en Raya</string>
+    <string name="eat_action">Devorar la Raya</string>
 
     // Create Game
     <string name="board_size">Tamaño del tablero</string>
@@ -32,6 +34,7 @@
     <string name="player_win">%s ganó</string>
     <string name="close_action">Cerrar</string>
     <string name="player_name">Nombre del oponente</string>
+    <string name="you">Usted</string>
 
     // Tutorial
     <string name="tutorial_title">Cómo jugar</string>
