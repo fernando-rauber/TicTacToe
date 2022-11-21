@@ -1,6 +1,6 @@
 package uk.fernando.tictactoe.datastore
 
-class GamePrefsStoreMock : GamePrefsStore {
+class GameSinglePrefsMock : GamePrefsStore {
 
     private var boardSize = 5
     private var winCondition = 3
