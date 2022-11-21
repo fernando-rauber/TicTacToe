@@ -30,8 +30,9 @@ class CreateGameViewModel(private val prefsStore: GamePrefsStore) : BaseViewMode
     }
 
     fun setBoardSize(size: Int) {
-        boardSize.value = size
         launchDefault {
+            boardSize.value = size
+
             prefsStore.storeBoardSize(size)
 
             if (size < winCondition.value)
@@ -42,28 +43,38 @@ class CreateGameViewModel(private val prefsStore: GamePrefsStore) : BaseViewMode
     }
 
     fun setWinCondition(value: Int) {
-        winCondition.value = value
-        launchDefault { prefsStore.storeWinCondition(value) }
+        launchDefault {
+            winCondition.value = value
+            prefsStore.storeWinCondition(value)
+        }
     }
 
     fun setRounds(value: Int) {
-        rounds.value = value
-        launchDefault { prefsStore.storeRounds(value) }
+        launchDefault {
+            rounds.value = value
+            prefsStore.storeRounds(value)
+        }
     }
 
     fun setIconType(value: Int) {
-        iconType.value = value
-        launchDefault { prefsStore.storeIconType(value) }
+        launchDefault {
+            iconType.value = value
+            prefsStore.storeIconType(value)
+        }
     }
 
     fun setGameType(value: Int) {
-        gameType.value = value
-        launchDefault { prefsStore.storeGameType(value) }
+        launchDefault {
+            gameType.value = value
+            prefsStore.storeGameType(value)
+        }
     }
 
     fun setPlayerName(value: String) {
-        val name = value.ifEmpty { "Player 2" }
-        launchDefault { prefsStore.storePLayer2Name(name) }
+        launchDefault {
+            playerName.value = value.ifEmpty { "Player 2" }
+            prefsStore.storePLayer2Name(playerName.value)
+        }
     }
 
     private fun updateWinConditionList(boardSize: Int) {

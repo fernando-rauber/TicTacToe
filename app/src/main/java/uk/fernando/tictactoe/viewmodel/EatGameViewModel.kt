@@ -34,15 +34,15 @@ class EatGameViewModel(
         if (imageSize.value == null)
             return CellResult.SIZE_NOT_SELECTED
 
-        val cell = _gamePosition[position]
+        val cell = _cellList[position]
         if (cell.isX == null || imageSize.value!! > cell.size!!) {
-            _gamePosition[position] = cell.copy(isX = isPLayer1Turn.value, size = imageSize.value)
+            _cellList[position] = cell.copy(isX = isPLayer1Turn.value, size = imageSize.value)
 
             reduceSizeQuantity()
 
             isPLayer1Turn.value = !isPLayer1Turn.value // Next Player
 
-            when (val gameResult = useCase.validateBoard(_gamePosition, winCondition)) {
+            when (val gameResult = useCase.validateBoard(_cellList, winCondition)) {
                 is GameResult.Winner -> {
                     val playerWinner = if (gameResult.result.isX!!) {
                         player1.value.score++

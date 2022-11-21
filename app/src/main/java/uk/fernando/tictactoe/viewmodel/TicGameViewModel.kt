@@ -27,10 +27,10 @@ open class TicGameViewModel(private val prefsStore: GamePrefsStore, private val 
     val roundResult = mutableStateOf<GameResult<Player>?>(null)
     val isPLayer1Turn = mutableStateOf(true)
 
-    protected val _gamePosition = mutableStateListOf<CellModel>()
-    val gamePosition: List<CellModel> = _gamePosition
+    protected val _cellList = mutableStateListOf<CellModel>()
+    val cellList: List<CellModel> = _cellList
 
-    init {
+    fun init() {
         launchDefault {
             winCondition = prefsStore.getWinCondition()
             rounds.value = prefsStore.getRounds()
@@ -43,7 +43,8 @@ open class TicGameViewModel(private val prefsStore: GamePrefsStore, private val 
                 player2.value = player2.value.copy(name = player2Name)
             }
 
-            _gamePosition.addAll(useCase.createCards(prefsStore.getBoardSize()))
+            _cellList.clear()
+            _cellList.addAll(useCase.createCards(prefsStore.getBoardSize()))
         }
     }
 
@@ -67,19 +68,19 @@ open class TicGameViewModel(private val prefsStore: GamePrefsStore, private val 
     }
 
     private fun computerTurn() = flow {
-        val index = aiUseCase.aiTurn(_gamePosition, winCondition)
+        val index = aiUseCase.aiTurn(_cellList, winCondition)
         delay(800)
         emit(insertValueCellTicTacToe(index))
     }
 
     open fun insertValueCellTicTacToe(position: Int): CellResult {
-        val cell = _gamePosition[position]
+        val cell = _cellList[position]
         if (cell.isX == null) {
-            _gamePosition[position] = cell.copy(isX = isPLayer1Turn.value)
+            _cellList[position] = cell.copy(isX = isPLayer1Turn.value)
 
             isPLayer1Turn.value = !isPLayer1Turn.value // Next Player
 
-            when (val gameResult = useCase.validateBoard(_gamePosition, winCondition)) {
+            when (val gameResult = useCase.validateBoard(_cellList, winCondition)) {
                 is GameResult.Winner -> {
                     val playerWinner = if (gameResult.result.isX!!) {
                         player1.value.score++
@@ -96,7 +97,7 @@ open class TicGameViewModel(private val prefsStore: GamePrefsStore, private val 
                 }
                 is GameResult.Draw -> {
                     roundResult.value = GameResult.Draw()
-                    return CellResult.DO_NOTHING
+                    return CellResult.DRAW
                 }
                 else -> {
                     return if (isAiOn && !isPLayer1Turn.value)
@@ -112,7 +113,7 @@ open class TicGameViewModel(private val prefsStore: GamePrefsStore, private val 
 
     fun updateWinnerCells(counter: Counter) {
         counter.ids.forEachIndexed { index, position ->
-            _gamePosition[position] = _gamePosition[position].copy(
+            _cellList[position] = _cellList[position].copy(
                 direction = counter.direction,
                 paddingStart = index == 0,
                 paddingEnd = index == (winCondition - 1)
@@ -121,8 +122,8 @@ open class TicGameViewModel(private val prefsStore: GamePrefsStore, private val 
     }
 
     fun startNextRound() {
-        (0 until _gamePosition.size).forEach { index ->
-            _gamePosition[index] = _gamePosition[index].copy(direction = null, isX = null, size = null)
+        (0 until _cellList.size).forEach { index ->
+            _cellList[index] = _cellList[index].copy(direction = null, isX = null, size = null)
         }
 
         currentRound.value++
@@ -130,11 +131,9 @@ open class TicGameViewModel(private val prefsStore: GamePrefsStore, private val 
 
         additionalWorkForEatTacToe()
 
-        if (!isPLayer1Turn.value)
+        if (isAiOn && !isPLayer1Turn.value)
             launchDefault { computerTurn().first() }
     }
 
-    open fun additionalWorkForEatTacToe() {
-
-    }
+    open fun additionalWorkForEatTacToe() {}
 }

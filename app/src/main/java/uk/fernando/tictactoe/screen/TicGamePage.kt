@@ -15,10 +15,7 @@ import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
@@ -70,6 +67,8 @@ fun TicGamePage(
     winCondition: Int,
     viewModel: TicGameViewModel = getViewModel()
 ) {
+    LaunchedEffect(Unit) { viewModel.init() }
+
     val fullScreenAd = AdInterstitial(LocalContext.current as MainActivity, stringResource(R.string.ad_interstitial_end_game))
 
     val sheetState = rememberModalBottomSheetState(
@@ -214,18 +213,20 @@ fun Board(modifier: Modifier, viewModel: TicGameViewModel, boardSize: Int, gameI
     val isSoundEnable = prefs.isSoundEnabled().collectAsState(initial = true)
     val audio = MediaPlayer.create(LocalContext.current, R.raw.sound_finish)
     val audioWrong = MediaPlayer.create(LocalContext.current, R.raw.bip)
+    val audioDraw = MediaPlayer.create(LocalContext.current, R.raw.sound_draw)
     val coroutine = rememberCoroutineScope()
 
     LazyVerticalGrid(
         modifier = modifier.fillMaxWidth(.8f),
         columns = GridCells.Fixed(boardSize),
         content = {
-            itemsIndexed(viewModel.gamePosition) { index, position ->
+            itemsIndexed(viewModel.cellList) { index, position ->
                 GameCell(position, boardSize, gameIcon) {
                     coroutine.launch {
                         when (viewModel.setCellValue(index)) {
                             CellResult.END_GAME -> audio.playAudio(isSoundEnable.value)
                             CellResult.ERROR -> audioWrong.playAudio(isSoundEnable.value)
+                            CellResult.DRAW -> audioDraw.playAudio(isSoundEnable.value)
                             CellResult.SIZE_NOT_SELECTED -> onSizeNoSelected()
                             else -> {}
                         }

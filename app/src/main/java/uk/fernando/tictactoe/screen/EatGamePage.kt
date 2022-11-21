@@ -50,6 +50,7 @@ fun EatGamePage(
     winCondition: Int,
     viewModel: EatGameViewModel = getViewModel()
 ) {
+    LaunchedEffect(Unit) { viewModel.init() }
 
     val prefs: PrefsStore by inject()
     val fullScreenAd = AdInterstitial(LocalContext.current as MainActivity, stringResource(R.string.ad_interstitial_end_game))
@@ -91,6 +92,7 @@ fun EatGamePage(
                     horizontalAlignment = CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                 ) {
+
                     WinConditionIcon(winCondition, gameIcon)
 
                     Board(
@@ -102,7 +104,9 @@ fun EatGamePage(
                         gameIcon = gameIcon,
                         onSizeNoSelected = { setHighlightSize(true) }
                     )
+                }
 
+                Column(Modifier.weight(.3f)) {
                     ItemSizeCount(
                         viewModel = viewModel,
                         gameIcon = gameIcon,
