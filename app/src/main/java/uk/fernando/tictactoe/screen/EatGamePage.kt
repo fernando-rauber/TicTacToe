@@ -36,10 +36,10 @@ import uk.fernando.tictactoe.ext.getIcon
 import uk.fernando.tictactoe.model.SizeModel
 import uk.fernando.tictactoe.theme.gold
 import uk.fernando.tictactoe.viewmodel.EatGameViewModel
-import uk.fernando.util.component.MyAnimatedVisibility
-import uk.fernando.util.component.MyDialog
-import uk.fernando.util.component.MyIconButton
-import uk.fernando.util.ext.clickableSingle
+import uk.fernando.uikit.component.MyAnimatedVisibility
+import uk.fernando.uikit.component.MyDialog
+import uk.fernando.uikit.component.MyIconButton
+import uk.fernando.uikit.ext.clickableSingle
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -60,9 +60,8 @@ fun EatGamePage(
     val (highlightSize, setHighlightSize) = remember { mutableStateOf(false) }
 
     ModalBottomSheetLayout(
-        sheetState = rememberModalBottomSheetState(
-            initialValue = if (viewModel.roundResult.value != null) ModalBottomSheetValue.Expanded else ModalBottomSheetValue.Hidden,
-            confirmStateChange = { it != ModalBottomSheetValue.HalfExpanded }
+        sheetState = rememberModalBottomSheetState(initialValue = if (viewModel.roundResult.value != null) ModalBottomSheetValue.Expanded else ModalBottomSheetValue.Hidden,
+            confirmValueChange = { it != ModalBottomSheetValue.HalfExpanded }
         ),
         sheetContent = {
             BottomSheetEndRound(
@@ -368,7 +367,7 @@ private fun MyTutorialDialog(gameIcon: Int, onClose: () -> Unit) {
                             contentDescription = null
                         )
                     }
-                    Divider(
+                    HorizontalDivider(
                         thickness = 3.dp,
                         color = Color.White.copy(0.8f)
                     )

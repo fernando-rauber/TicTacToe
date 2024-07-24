@@ -31,10 +31,10 @@ import uk.fernando.tictactoe.enum.GameIcon
 import uk.fernando.tictactoe.navigation.Directions
 import uk.fernando.tictactoe.theme.*
 import uk.fernando.tictactoe.viewmodel.CreateGameViewModel
-import uk.fernando.util.component.MyAnimatedVisibility
-import uk.fernando.util.component.MyButton
-import uk.fernando.util.component.MyIconButton
-import uk.fernando.util.ext.safeNav
+import uk.fernando.uikit.component.MyAnimatedVisibility
+import uk.fernando.uikit.component.MyButton
+import uk.fernando.uikit.component.MyIconButton
+import uk.fernando.uikit.ext.safeNav
 
 @Composable
 fun CreateGamePage(

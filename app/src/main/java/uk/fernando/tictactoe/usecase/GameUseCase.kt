@@ -5,7 +5,7 @@ import uk.fernando.tictactoe.enum.WinnerDirection
 import uk.fernando.tictactoe.model.CellModel
 import uk.fernando.tictactoe.model.Counter
 import uk.fernando.tictactoe.util.GameResult
-import uk.fernando.util.ext.TAG
+import uk.fernando.uikit.ext.TAG
 import kotlin.math.sqrt
 
 class GameUseCase(private val logger: MyLogger) {

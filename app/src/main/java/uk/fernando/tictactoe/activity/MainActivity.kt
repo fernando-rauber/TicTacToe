@@ -17,7 +17,7 @@ import uk.fernando.tictactoe.navigation.buildGraph
 import uk.fernando.tictactoe.theme.TicTacToeTheme
 import uk.fernando.tictactoe.theme.green
 import uk.fernando.tictactoe.theme.greenDark
-import uk.fernando.util.component.UpdateStatusBar
+import uk.fernando.uikit.component.UpdateStatusBar
 
 @OptIn(ExperimentalAnimationApi::class)
 class MainActivity : ComponentActivity() {

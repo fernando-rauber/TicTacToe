@@ -3,6 +3,7 @@ package uk.fernando.tictactoe.component
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -33,7 +34,7 @@ fun WinConditionIcon(winCondition: Int, gameIcon: Int) {
                 }
             }
 
-            Divider(
+            HorizontalDivider(
                 thickness = 2.dp,
                 color = Color.White.copy(0.8f)
             )

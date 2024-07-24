@@ -1,6 +1,7 @@
 package uk.fernando.tictactoe.screen
 
 import android.media.MediaPlayer
+import android.util.Log
 import androidx.annotation.DrawableRes
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.*
@@ -54,9 +55,9 @@ import uk.fernando.tictactoe.theme.dark
 import uk.fernando.tictactoe.theme.greenLight
 import uk.fernando.tictactoe.util.GameResult
 import uk.fernando.tictactoe.viewmodel.TicGameViewModel
-import uk.fernando.util.component.MyButton
-import uk.fernando.util.ext.clickableSingle
-import uk.fernando.util.ext.playAudio
+import uk.fernando.uikit.component.MyButton
+import uk.fernando.uikit.ext.clickableSingle
+import uk.fernando.uikit.ext.playAudio
 import kotlin.math.ceil
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -71,10 +72,10 @@ fun TicGamePage(
 
     val fullScreenAd = AdInterstitial(LocalContext.current as MainActivity, stringResource(R.string.ad_interstitial_end_game))
 
-    val sheetState = rememberModalBottomSheetState(
-        initialValue = if (viewModel.roundResult.value != null) ModalBottomSheetValue.Expanded else ModalBottomSheetValue.Hidden,
-        confirmStateChange = { it != ModalBottomSheetValue.HalfExpanded }
-    )
+    val sheetState =
+        rememberModalBottomSheetState(initialValue = if (viewModel.roundResult.value != null) ModalBottomSheetValue.Expanded else ModalBottomSheetValue.Hidden,
+            confirmValueChange = { it != ModalBottomSheetValue.HalfExpanded }
+        )
 
     ModalBottomSheetLayout(
         sheetState = sheetState,
@@ -124,7 +125,7 @@ fun TicGamePage(
 @Composable
 fun GameTopBar(viewModel: TicGameViewModel, onClose: () -> Unit) {
     NavigationTopBar(
-        title = stringResource(R.string.current_round, viewModel.currentRound.value, viewModel.rounds.value),
+        title = stringResource(R.string.current_round, viewModel.currentRound.intValue, viewModel.rounds.intValue),
         rightIcon = {
             Card(
                 modifier = Modifier
@@ -166,12 +167,13 @@ fun BottomSheetEndRound(viewModel: TicGameViewModel, onClose: () -> Unit) {
                         playerWinner = viewModel.player1.value
                         isDraw = true
                     }
+
                     else -> {}
                 }
 
 
-                var isEndGame = playerWinner.score >= ceil(viewModel.rounds.value / 2f)
-                if (!isEndGame && viewModel.currentRound.value == viewModel.rounds.value) {
+                var isEndGame = playerWinner.score >= ceil(viewModel.rounds.intValue / 2f)
+                if (!isEndGame && viewModel.currentRound.intValue == viewModel.rounds.intValue) {
                     isEndGame = true
                 }
 
@@ -208,11 +210,12 @@ fun BottomSheetEndRound(viewModel: TicGameViewModel, onClose: () -> Unit) {
 }
 
 @Composable
-fun Board(modifier: Modifier, viewModel: TicGameViewModel, boardSize: Int, gameIcon: Int, onSizeNoSelected: () -> Unit = {}) {
+fun Board(modifier: Modifier, viewModel: TicGameViewModel, boardSize: Int, gameIcon: Int, onSizeNoSelected: (() -> Unit)? = null) {
     val prefs: PrefsStore by inject()
     val isSoundEnable = prefs.isSoundEnabled().collectAsState(initial = true)
     val audio = MediaPlayer.create(LocalContext.current, R.raw.sound_finish)
     val audioWrong = MediaPlayer.create(LocalContext.current, R.raw.bip)
+    val audioClick = MediaPlayer.create(LocalContext.current, R.raw.click)
     val audioDraw = MediaPlayer.create(LocalContext.current, R.raw.sound_draw)
     val coroutine = rememberCoroutineScope()
 
@@ -223,11 +226,14 @@ fun Board(modifier: Modifier, viewModel: TicGameViewModel, boardSize: Int, gameI
             itemsIndexed(viewModel.cellList) { index, position ->
                 GameCell(position, boardSize, gameIcon) {
                     coroutine.launch {
+                        if (viewModel.isAiOn && onSizeNoSelected == null)
+                            audioClick.playAudio(isSoundEnable.value)
                         when (viewModel.setCellValue(index)) {
                             CellResult.END_GAME -> audio.playAudio(isSoundEnable.value)
                             CellResult.ERROR -> audioWrong.playAudio(isSoundEnable.value)
                             CellResult.DRAW -> audioDraw.playAudio(isSoundEnable.value)
-                            CellResult.SIZE_NOT_SELECTED -> onSizeNoSelected()
+                            CellResult.SIZE_NOT_SELECTED -> onSizeNoSelected?.invoke()
+                            CellResult.DO_NOTHING -> audioClick.playAudio(isSoundEnable.value)
                             else -> {}
                         }
                     }
@@ -316,14 +322,14 @@ fun BottomBar(viewModel: TicGameViewModel, gameIcon: Int) {
 private fun BottomBarAvatar(avatar: Int, isPlayerTurn: Boolean) {
     Column(horizontalAlignment = CenterHorizontally) {
 
-        val translation by rememberInfiniteTransition().animateValue(
+        val translation by rememberInfiniteTransition(label = "").animateValue(
             initialValue = 10.dp,
             targetValue = (-10).dp,
             typeConverter = Dp.VectorConverter,
             animationSpec = infiniteRepeatable(
                 animation = tween(350, easing = LinearOutSlowInEasing),
                 repeatMode = RepeatMode.Reverse
-            )
+            ), label = ""
         )
 
         Icon(

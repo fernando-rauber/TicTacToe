@@ -19,9 +19,9 @@ import uk.fernando.tictactoe.R
 import uk.fernando.tictactoe.component.NavigationTopBar
 import uk.fernando.tictactoe.navigation.Directions
 import uk.fernando.tictactoe.theme.greenLight
-import uk.fernando.util.component.MyButton
-import uk.fernando.util.component.MyIconButton
-import uk.fernando.util.ext.safeNav
+import uk.fernando.uikit.component.MyButton
+import uk.fernando.uikit.component.MyIconButton
+import uk.fernando.uikit.ext.safeNav
 
 @Composable
 fun HomePage(navController: NavController = NavController(LocalContext.current)) {

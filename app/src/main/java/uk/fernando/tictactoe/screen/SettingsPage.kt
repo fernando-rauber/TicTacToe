@@ -26,7 +26,7 @@ import kotlinx.coroutines.launch
 import org.koin.androidx.compose.inject
 import uk.fernando.tictactoe.BuildConfig
 import uk.fernando.tictactoe.datastore.PrefsStore
-import uk.fernando.util.ext.clickableSingle
+import uk.fernando.uikit.ext.clickableSingle
 import uk.fernando.tictactoe.R
 import uk.fernando.tictactoe.component.NavigationTopBar
 
@@ -110,7 +110,7 @@ private fun CustomSettingsResourcesCard(
 ) {
     Surface(
         modifier = modifier,
-        shape = CutCornerShape(topEndPercent = 25, bottomStartPercent = 25),
+        shape = CutCornerShape(topEndPercent = 25),
         tonalElevation = 2.dp,
         shadowElevation = 4.dp
     ) {

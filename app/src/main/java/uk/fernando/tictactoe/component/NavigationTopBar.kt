@@ -19,7 +19,7 @@ import uk.fernando.tictactoe.R
 import uk.fernando.tictactoe.theme.gold
 import uk.fernando.tictactoe.theme.greenLight
 import uk.fernando.tictactoe.theme.red
-import uk.fernando.util.component.MyIconButton
+import uk.fernando.uikit.component.MyIconButton
 
 @Composable
 fun NavigationTopBar(

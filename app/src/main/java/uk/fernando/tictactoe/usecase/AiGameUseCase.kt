@@ -2,7 +2,7 @@ package uk.fernando.tictactoe.usecase
 
 import uk.fernando.logger.MyLogger
 import uk.fernando.tictactoe.model.CellModel
-import uk.fernando.util.ext.TAG
+import uk.fernando.uikit.ext.TAG
 import kotlin.math.sqrt
 import kotlin.random.Random
 
